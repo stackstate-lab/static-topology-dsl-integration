@@ -3,7 +3,8 @@ from typing import Any, Dict, List
 import attr
 from asteval import Interpreter
 from six import string_types
-from static_topo_impl.model import Component, Health, Relation, TopologyFactory
+from static_topo_impl.model.stackstate import Component, Health, Relation
+from static_topo_impl.model.factory import TopologyFactory
 from textx import metamodel_from_str, textx_isinstance
 from textx.metamodel import TextXMetaModel
 

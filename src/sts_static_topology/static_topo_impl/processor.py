@@ -3,9 +3,10 @@ from typing import List
 
 from stackstate_checks.base import AgentCheck, Health
 from static_topo_impl.dsl.interpreter import TopologyInterpreter
-from static_topo_impl.model import Component
-from static_topo_impl.model import Health as ComponentHealth
-from static_topo_impl.model import InstanceInfo, TopologyFactory
+from static_topo_impl.model.stackstate import Component, Relation
+from static_topo_impl.model.stackstate import Health as ComponentHealth
+from static_topo_impl.model.instance import InstanceInfo
+from static_topo_impl.model.factory import TopologyFactory
 
 
 class Processor:
@@ -21,7 +22,7 @@ class Processor:
             if topo_dsl_file.endswith(".topo"):
                 topo_files = [topo_dsl_file]  # Single file
             else:
-                topo_files = [f for f in os.listdir(topo_dsl_file) if f.endswith(".topo")]  # Folder
+                topo_files = [os.path.join(topo_dsl_file, f) for f in os.listdir(topo_dsl_file) if f.endswith(".topo")]
             for topo_file in topo_files:
                 self.log.info(f"Processing '{topo_file}'")
                 model = interpreter.model_from_file(topo_file)
@@ -37,7 +38,8 @@ class Processor:
             c_as_dict = c.properties.to_primitive()
             self.agent_check.component(c.uid, c.component_type, c_as_dict)
         self.log.info(f"Publishing '{len(self.factory.relations)}' relations")
-        for r in self.factory.relations:
+        relations: List[Relation] = self.factory.relations.values()
+        for r in relations:
             self.agent_check.relation(r.source_id, r.target_id, r.rel_type, {})
         self.agent_check.stop_snapshot()
         self._publish_health()

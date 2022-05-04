@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from static_topo_impl.model import Component, Health, Relation
+from static_topo_impl.model.stackstate import Component, Health, Relation
 
 
 class TopologyFactory:
