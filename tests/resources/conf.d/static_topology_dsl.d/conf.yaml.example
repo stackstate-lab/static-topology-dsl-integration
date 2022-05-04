@@ -1,0 +1,8 @@
+init_config:
+
+instances:
+  - instance_url: "static_topo_dsl"
+    min_collection_interval: 300
+    topo_files:
+      - tests/resources/conf.d/static_topology_dsl.d/samples.topo
+

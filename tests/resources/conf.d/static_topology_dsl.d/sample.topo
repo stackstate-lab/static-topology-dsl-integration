@@ -1,0 +1,34 @@
+
+
+defaults {
+  id ```
+       "urn:%s:%s" % (component.component_type.lower(), component.properties.name)
+  ```
+  environment Prod
+  layer Test
+  identifiers [ "test", "so cool" ]
+  labels [ rav, 'test:again']
+  data {
+    myprop myvalu,
+    myarr [ test]
+  }
+
+}
+
+components {
+  Host (
+    name test
+    environment xxx
+    layer xxx
+    labels [```"s"```]
+    processor ```
+      print("Helloword")
+      rav = 10 + 10
+      def func(x):
+        print("hi")
+    ```
+    relations [ test2, "test3|hosted by"]
+  )
+  Host In line(id test2, name test2, environment xxx, layer xxx)
+  Host.dot.line(id test3, name test3, environment xxx, layer xxx)
+}
