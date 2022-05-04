@@ -5,30 +5,23 @@ defaults {
        "urn:%s:%s" % (component.component_type.lower(), component.properties.name)
   ```
   environment Prod
-  layer Test
-  identifiers [ "test", "so cool" ]
-  labels [ rav, 'test:again']
+  layer Machines
+  domain StaticTopology
+  identifiers [ ``` component.uid ``` ]
+  labels [ "staticdemo"]
   data {
-    myprop myvalu,
-    myarr [ test]
+    myprop myvalue,
+    myarr [ test ]
   }
 
 }
 
 components {
-  Host (
+  host (
     name test
-    environment xxx
-    layer xxx
-    labels [```"s"```]
-    processor ```
-      print("Helloword")
-      rav = 10 + 10
-      def func(x):
-        print("hi")
-    ```
+    labels ["static:test"]
     relations [ test2, "test3|hosted by"]
   )
-  Host In line(id test2, name test2, environment xxx, layer xxx)
-  Host.dot.line(id test3, name test3, environment xxx, layer xxx)
+  host(name test2, health CRITICAL)
+  host(name test3)
 }

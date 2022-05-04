@@ -7,6 +7,7 @@ from static_topo_impl.model.stackstate import Component, Health, Relation
 from static_topo_impl.model.factory import TopologyFactory
 from textx import metamodel_from_str, textx_isinstance
 from textx.metamodel import TextXMetaModel
+from textx.model import TextXSyntaxError
 
 
 @attr.s(kw_only=True)
@@ -174,7 +175,10 @@ class TopologyInterpreter:
         self.topology_meta = metamodel_from_str(TOPOLOGY_TX)
 
     def model_from_file(self, model_file_name: str):
-        return self.topology_meta.model_from_file(model_file_name)
+        try:
+            return self.topology_meta.model_from_file(model_file_name)
+        except TextXSyntaxError as e:
+            raise Exception(e.message)
 
     def interpret(self, model) -> TopologyFactory:
         defaults: Dict[str, Any] = {}
@@ -221,8 +225,8 @@ class TopologyInterpreter:
         component.properties.domain = property_interpreter.get_string_property("domain", "Unknown")
         component.properties.environment = property_interpreter.get_string_property("environment", "Unknown")
         component.properties.labels.extend(property_interpreter.merge_list_property("labels"))
-        component.properties.identifiers.extend(property_interpreter.merge_list_property("identifiers"))
         component.uid = property_interpreter.get_string_property("id", None)
+        component.properties.identifiers.extend(property_interpreter.merge_list_property("identifiers"))
         property_interpreter.run_processors()
 
         if component.uid is None:
@@ -313,7 +317,7 @@ Property:
 ;
 
 PropertyKeyword:
-     'identifiers' | 'id' | 'name' | 'layer' | 'environment' | 'labels' | 'processor' | 'data' | 'relations' |
+     'identifiers' | 'id' | 'name' | 'layer' | 'domain' | 'environment' | 'labels' | 'processor' | 'data' | 'relations' |
      'health' | 'healthMessage'
 ;
 
