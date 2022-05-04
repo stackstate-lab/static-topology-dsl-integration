@@ -3,10 +3,11 @@ from typing import List
 
 from stackstate_checks.base import AgentCheck, Health
 from static_topo_impl.dsl.interpreter import TopologyInterpreter
-from static_topo_impl.model.stackstate import Component, Relation
-from static_topo_impl.model.stackstate import Health as ComponentHealth
-from static_topo_impl.model.instance import InstanceInfo
 from static_topo_impl.model.factory import TopologyFactory
+from static_topo_impl.model.instance import InstanceInfo
+from static_topo_impl.model.stackstate import Component
+from static_topo_impl.model.stackstate import Health as ComponentHealth
+from static_topo_impl.model.stackstate import Relation
 
 
 class Processor:
