@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from static_topo_impl.model.stackstate import Component, Relation, Health
+from static_topo_impl.model import Component, Health, Relation
 
 
 class TopologyFactory:
@@ -17,7 +17,9 @@ class TopologyFactory:
     def get_component(self, uid: str) -> Component:
         return self.components[uid]
 
-    def get_component_by_name_and_type(self, component_type: str, name: str, raise_not_found: bool=True) -> Optional[Component]:
+    def get_component_by_name_and_type(
+        self, component_type: str, name: str, raise_not_found: bool = True
+    ) -> Optional[Component]:
         result = [c for c in self.components.values() if c.component_type == component_type and c.get_name() == name]
         if len(result) == 1:
             return result[0]
@@ -28,7 +30,7 @@ class TopologyFactory:
         else:
             raise Exception(f"More than 1 result found for Component ({component_type}, {name}) search.")
 
-    def get_component_by_name(self, name: str, raise_not_found: bool=True) -> Optional[Component]:
+    def get_component_by_name(self, name: str, raise_not_found: bool = True) -> Optional[Component]:
         result = [c for c in self.components.values() if c.get_name() == name]
         if len(result) == 1:
             return result[0]
@@ -46,12 +48,6 @@ class TopologyFactory:
         rel_id = f"{source_id} --> {target_id}"
         if rel_id in self.relations:
             raise Exception(f"Relation '{rel_id}' already exists.")
-        relation = Relation(
-            {
-                "source_id": source_id,
-                "target_id": target_id,
-                "rel_type": rel_type
-            }
-        )
+        relation = Relation({"source_id": source_id, "target_id": target_id, "rel_type": rel_type})
         self.relations[rel_id] = relation
         return relation

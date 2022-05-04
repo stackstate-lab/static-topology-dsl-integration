@@ -1,4 +1,4 @@
-from static_topo_impl.dsl import TopologyInterpreter
+from static_topo_impl.dsl.interpreter import TopologyInterpreter
 from static_topo_impl.model import TopologyFactory
 
 

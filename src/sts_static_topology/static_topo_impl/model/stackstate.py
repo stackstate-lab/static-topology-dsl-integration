@@ -2,7 +2,8 @@ from typing import Any, Dict, List
 
 from schematics import Model
 from schematics.transforms import blacklist
-from schematics.types import (BaseType, DictType, ListType, ModelType, StringType)
+from schematics.types import (BaseType, DictType, ListType, ModelType,
+                              StringType)
 
 
 class AnyType(BaseType):
@@ -53,7 +54,7 @@ class Health(Model):
     check_state_id: str = StringType(required=True)
     name: str = StringType(required=True)
     topology_element_identifier: str = StringType(required=True)
-    health_value: str = StringType(required=True, choices=['CLEAR', 'DEVIATING', 'CRITICAL'])
+    health_value: str = StringType(required=True, choices=["CLEAR", "DEVIATING", "CRITICAL"])
     message: str = StringType(default="")
 
 

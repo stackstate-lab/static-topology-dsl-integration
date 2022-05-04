@@ -1,14 +1,11 @@
-from typing import Dict, Any, List
-
-from textx import metamodel_from_str, textx_isinstance
-from textx.metamodel import TextXMetaModel
-from asteval import Interpreter
-from six import string_types
+from typing import Any, Dict, List
 
 import attr
-
-from static_topo_impl.model.factory import TopologyFactory
-from static_topo_impl.model.stackstate import Component, Relation, Health
+from asteval import Interpreter
+from six import string_types
+from static_topo_impl.model import Component, Health, Relation, TopologyFactory
+from textx import metamodel_from_str, textx_isinstance
+from textx.metamodel import TextXMetaModel
 
 
 @attr.s(kw_only=True)
@@ -18,17 +15,23 @@ class TopologyContext:
 
 
 class PropertyInterpreter:
-    def __init__(self, properties: Dict[str, Any], defaults: Dict[str, Any], source_name: str,
-                 ctx: TopologyContext, topology_meta: TextXMetaModel):
+    def __init__(
+        self,
+        properties: Dict[str, Any],
+        defaults: Dict[str, Any],
+        source_name: str,
+        ctx: TopologyContext,
+        topology_meta: TextXMetaModel,
+    ):
         self.source_name = source_name
         self.defaults = defaults
         self.properties = properties
         self.ctx = ctx
         self.topology_meta = topology_meta
-        self.PropertyObjectClass = self.topology_meta['PropertyObject']
-        self.PropertyListClass = self.topology_meta['PropertyList']
-        self.PropertyCodeClass = self.topology_meta['PropertyCode']
-        self.PropertyClass = self.topology_meta['Property']
+        self.PropertyObjectClass = self.topology_meta["PropertyObject"]
+        self.PropertyListClass = self.topology_meta["PropertyList"]
+        self.PropertyCodeClass = self.topology_meta["PropertyCode"]
+        self.PropertyClass = self.topology_meta["Property"]
         self.default_source = "default"
 
     def get_string_property(self, name: str, default=None) -> str:
@@ -90,10 +93,10 @@ class PropertyInterpreter:
                 value[member.key] = self._convert_value(member.value, property_name, source_name)
             return value
         elif textx_isinstance(value_ast, self.PropertyListClass):
-            value = []
+            value_list = []
             for v in value_ast.values:
-                value.append(self._convert_value(v, property_name, source_name))
-            return value
+                value_list.append(self._convert_value(v, property_name, source_name))
+            return value_list
         elif textx_isinstance(value_ast, self.PropertyCodeClass):
             return self._run_code(value_ast.code, property_name, source_name)
         else:
@@ -131,7 +134,7 @@ class PropertyInterpreter:
             padding_count = 0
             second_line = code_lines[1]
             for i in range(0, len(second_line)):
-                if second_line[i] != ' ':
+                if second_line[i] != " ":
                     break
                 padding_count += 1
             for i in range(1, len(code_lines)):
@@ -149,7 +152,7 @@ class PropertyInterpreter:
 
     @staticmethod
     def _eval_expression(
-            expression: str, aeval: Interpreter, eval_property: str, source_name: str, fail_on_error: bool = True
+        expression: str, aeval: Interpreter, eval_property: str, source_name: str, fail_on_error: bool = True
     ):
         existing_errs = len(aeval.error)
         result = aeval.eval(expression)
@@ -193,16 +196,19 @@ class TopologyInterpreter:
                     if target_component:
                         self.factory.add_relation(relation.source_id, target_component.uid, relation.rel_type)
                     else:
-                        raise Exception(f"Failed to find related component '{relation.target_id}'. "
-                                        f"Reference from component {source.uid}.")
+                        raise Exception(
+                            f"Failed to find related component '{relation.target_id}'. "
+                            f"Reference from component {source.uid}."
+                        )
 
     def _interpret_component(self, component_ast, defaults):
         component = Component()
         component.component_type = component_ast.component_type
         properties = self._index_properties(component_ast.properties)
         ctx = TopologyContext(factory=self.factory, component=component)
-        property_interpreter = PropertyInterpreter(properties, defaults, component.component_type, ctx,
-                                                   self.topology_meta)
+        property_interpreter = PropertyInterpreter(
+            properties, defaults, component.component_type, ctx, self.topology_meta
+        )
 
         component.set_name(property_interpreter.get_property("name"))
         if component.get_name() is None:
@@ -219,8 +225,9 @@ class TopologyInterpreter:
         property_interpreter.run_processors()
 
         if component.uid is None:
-            raise Exception("Component id is required for "
-                            f"'{property_interpreter.source_name}({component.component_type})'.")
+            raise Exception(
+                "Component id is required for " f"'{property_interpreter.source_name}({component.component_type})'."
+            )
 
         self._interpret_health(component, property_interpreter)
         self._interpret_relations(component, property_interpreter)
@@ -234,11 +241,9 @@ class TopologyInterpreter:
             rel_type = "uses"
             if len(rel_parts) == 2:
                 rel_type = rel_parts[1]
-            component.relations.append(Relation({
-                "source_id": component.uid,
-                "target_id": rel_parts[0],
-                "rel_type": rel_type
-            }))
+            component.relations.append(
+                Relation({"source_id": component.uid, "target_id": rel_parts[0], "rel_type": rel_type})
+            )
 
     def _interpret_health(self, component: Component, property_interpreter: PropertyInterpreter):
         health_info = property_interpreter.get_string_property("health", "HealthCheck|CLEAR")
@@ -307,7 +312,8 @@ Property:
 ;
 
 PropertyKeyword:
-     'identifiers' | 'id' | 'name' | 'layer' | 'environment' | 'labels' | 'processor' | 'data' | 'relations' | 'health' | 'healthMessage' 
+     'identifiers' | 'id' | 'name' | 'layer' | 'environment' | 'labels' | 'processor' | 'data' | 'relations' |
+     'health' | 'healthMessage'
 ;
 
 PropertyString:
@@ -327,7 +333,7 @@ PropertyObject:
 ;
 
 PropertyCode:
-   "```" code=/(?ms)(.*?)[`]{3}/ 
+   "```" code=/(?ms)(.*?)[`]{3}/
 ;
 
 PropertyMember:

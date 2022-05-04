@@ -49,7 +49,7 @@ deps =
     enum34
 py_backwards = true
 commands =
-    pip uninstall -y inventory
+    pip uninstall -y sts_static_topology
     poetry install
     poetry run pytest -W ignore::DeprecationWarning
 """
@@ -72,7 +72,7 @@ exclude = '''
 '''
 
 [tool.flakehell]
-exclude = ["README.rst", "README.md", ".eggs", ".tox", "build",".venv", ".agent"]
+exclude = ["README.rst", "README.md", ".eggs", ".tox", "build",".venv", ".agent", "out", "model"]
 include = ["src", "tests"]
 format = "colored"
 max_line_length = 120

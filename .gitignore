@@ -125,3 +125,4 @@ tests/resources/conf.d/**/conf.yaml
 /rontgen-agent-checks/tests/resources/conf.d/rontgen.d/conf.yaml
 /rontgen-agent-checks/tests/resources/share/aws/
 out
+/.mypy_cache/

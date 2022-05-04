@@ -1,9 +1,11 @@
-from typing import List
 import os
+from typing import List
 
-from static_topo_impl.dsl.interpreter import TopologyInterpreter
-from static_topo_impl.model import Component, InstanceInfo, TopologyFactory, Health as ComponentHealth
 from stackstate_checks.base import AgentCheck, Health
+from static_topo_impl.dsl.interpreter import TopologyInterpreter
+from static_topo_impl.model import Component
+from static_topo_impl.model import Health as ComponentHealth
+from static_topo_impl.model import InstanceInfo, TopologyFactory
 
 
 class Processor:
@@ -17,9 +19,9 @@ class Processor:
         interpreter = TopologyInterpreter(self.factory)
         for topo_dsl_file in self.instance.topo_files:
             if topo_dsl_file.endswith(".topo"):
-                topo_files = [topo_dsl_file]    # Single file
+                topo_files = [topo_dsl_file]  # Single file
             else:
-                topo_files = [f for f in os.listdir(topo_dsl_file) if f.endswith('.topo')]  # Folder
+                topo_files = [f for f in os.listdir(topo_dsl_file) if f.endswith(".topo")]  # Folder
             for topo_file in topo_files:
                 self.log.info(f"Processing '{topo_file}'")
                 model = interpreter.model_from_file(topo_file)
