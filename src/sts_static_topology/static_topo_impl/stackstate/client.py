@@ -36,16 +36,12 @@ class StackStateClient:
 
     def publish_health_checks(self, health_checks: List[HealthCheckState], dry_run=False, stats=SyncStats()) -> SyncStats:
         stats.checks = len(health_checks)
-        if stats.checks == 0:
-            return stats
         payload = self._prepare_health_sync_payload(health_checks)
         return self._post_data(payload, dry_run, stats)
 
     def publish(self, components: List[Component], relations: List[Relation], dry_run=False, stats=SyncStats()) -> SyncStats:
         stats.components = len(components)
         stats.relations = len(relations)
-        if stats.components == 0:
-            return stats
         payload = self._prepare_topo_payload(components, relations)
         return self._post_data(payload, dry_run, stats)
 
