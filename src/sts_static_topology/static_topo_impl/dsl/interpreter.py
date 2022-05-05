@@ -327,7 +327,7 @@ PropertyString:
 ;
 
 PropertyValue:
-    PropertyString | FLOAT | BOOL | PropertyObject | PropertyList | PropertyCode
+    PropertyString | FLOAT | INT |BOOL | PropertyObject | PropertyList | PropertyCode
 ;
 
 PropertyList:

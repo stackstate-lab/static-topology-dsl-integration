@@ -28,7 +28,7 @@ ComponentInline:
 ;
 
 ComponentType:
-    /[^\\d\\W][\\w.\\s]*\\b/
+    /[^\d\W][\w.\s]*\b/
 ;
 
 Property:
@@ -45,7 +45,7 @@ PropertyString:
 ;
 
 PropertyValue:
-    PropertyString | FLOAT | BOOL | PropertyObject | PropertyList | PropertyCode
+    PropertyString | FLOAT | INT | BOOL | PropertyObject | PropertyList | PropertyCode
 ;
 
 PropertyList:
@@ -63,7 +63,6 @@ PropertyCode:
 PropertyMember:
     key=ID  value=PropertyValue
 ;
-
 
 Comment:
   /#.*$/
