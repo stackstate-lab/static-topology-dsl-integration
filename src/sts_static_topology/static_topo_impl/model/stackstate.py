@@ -97,7 +97,7 @@ class Component(Model):
 
 class HealthCheckState(Model):
     check_id: str = StringType(required=True, serialized_name="checkStateId")
-    check_name: str = StringType(required=True)
+    check_name: str = StringType(required=True, serialized_name="name")
     topo_identifier: str = StringType(required=True, serialized_name="topologyElementIdentifier")
     message: str = StringType(required=False)
     health: str = StringType(required=True, choices=["CLEAR", "DEVIATING", "CRITICAL"])
