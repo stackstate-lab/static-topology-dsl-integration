@@ -1,0 +1,25 @@
+{
+    "name": "topo",
+    "displayName": "TOPO",
+    "description": "StackState Topo DSL",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.66.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "topo",
+            "aliases": ["StackStateTopo", "topo"],
+            "extensions": [".topo"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "topo",
+            "scopeName": "source.topo",
+            "path": "./syntaxes/topo.tmLanguage.json"
+        }]
+    }
+}

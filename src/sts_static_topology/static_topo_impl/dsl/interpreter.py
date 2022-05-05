@@ -344,4 +344,8 @@ PropertyCode:
 PropertyMember:
     key=ID  value=PropertyValue
 ;
+
+Comment:
+  /#.*$/
+;
 """

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>contactEmailRot13</key>
+	<string>rnaidoo@stackstate.com</string>
+	<key>contactName</key>
+	<string>Ravan Naidoo</string>
+	<key>description</key>
+	<string>StackState static topology dsl bundle.</string>
+	<key>name</key>
+	<string>topo</string>
+	<key>uuid</key>
+	<string>4C593F8C-1469-440A-926D-5F31245DF312</string>
+</dict>
+</plist>

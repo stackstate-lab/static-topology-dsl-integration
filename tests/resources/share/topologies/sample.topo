@@ -8,16 +8,16 @@ defaults {
   layer Machines
   domain StaticTopology
   identifiers [ ```component.uid``` ]
-  labels [ "staticdemo"]
+  labels [ staticdemo ]
   data {
     myprop myvalue,
     myarr [ test ]
   }
-
 }
 
 components {
   host (
+
     name test
     labels ["static:test"]
     relations [ test2, "test3|hosted by"]

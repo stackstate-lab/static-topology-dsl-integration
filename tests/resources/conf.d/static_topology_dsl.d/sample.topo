@@ -1,6 +1,6 @@
 
-
 defaults {
+  # Define inline python code to generate values
   id ```
        "urn:%s:%s" % (component.component_type.lower(), component.properties.name)
   ```
@@ -29,6 +29,10 @@ components {
     ```
     relations [ test2, "test3|hosted by"]
   )
+
+  # Lets add compoent type with spaces in name
   Host In line(id test2, name test2, environment xxx, layer xxx)
+
+  # Lets add compoent type with dot in name
   Host.dot.line(id test3, name test3, environment xxx, layer xxx)
 }

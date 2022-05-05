@@ -1,0 +1,94 @@
+{
+	"fileTypes": [
+	  "topo"
+	],
+	"name": "StackStateTopoDsl",
+	"patterns": [
+	  {
+		"include": "#comment"
+	  },
+	  {
+		"include": "#string"
+	  },
+	  {
+		"include": "#number"
+	  },
+	  {
+		"include": "#language_keyword"
+	  }
+	],
+	"repository": {
+	  "comment": {
+		"patterns": [
+		  {
+			"match": "#.*$",
+			"name": "comment.line"
+		  }
+		]
+	  },
+	  "language_keyword": {
+		"patterns": [
+		  {
+			"match": "\\b(defaults|components|identifiers|id|name|layer|domain|environment|processor|labels|data|relations|health|healthMessage)\\b",
+			"name": "keyword.control.topo"
+		  },
+		  {
+			"match": "\\{",
+			"name": "constant.language"
+		  },
+		  {
+			"match": "\\}",
+			"name": "constant.language"
+		  },
+		  {
+			"match": "\\(",
+			"name": "constant.language"
+		  },
+		  {
+			"match": "\\)",
+			"name": "constant.language"
+		  },
+		  {
+			"match": "\\,",
+			"name": "constant.language"
+		  },
+		  {
+			"match": "\\[",
+			"name": "constant.language"
+		  },
+		  {
+			"match": "\\]",
+			"name": "constant.language"
+		  },
+		  {
+			"match": "\\`\\`\\`",
+			"name": "constant.language"
+		  }
+		]
+	  },
+	  "number": {
+		"patterns": [
+		  {
+			"match": "\\b[0-9]+\\b\\.{0,1}",
+			"name": "constant.numeric"
+		  }
+		]
+	  },
+	  "string": {
+		"patterns": [
+		  {
+			"begin": "'",
+			"end": "'",
+			"name": "string.quoted.single"
+		  },
+		  {
+			"begin": "\"",
+			"end": "\"",
+			"name": "string.quoted.double"
+		  }
+		]
+	  }
+	},
+	"scope": "source.topo",
+	"scopeName": "source.topo"
+  }
