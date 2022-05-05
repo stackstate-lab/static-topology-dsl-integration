@@ -53,4 +53,4 @@ class SyncStats(Model):
     components: int = IntType()
     relations: int = IntType()
     checks: int = IntType()
-    payload: Optional[str] = StringType()
+    payloads: List[str] = ListType(StringType, default=[])

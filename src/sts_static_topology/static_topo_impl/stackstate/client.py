@@ -34,22 +34,24 @@ class StackStateClient:
         self.config = config
         self.intake_url = f"{self.config.receiver_url}/stsAgent/intake?api_key={self.config.api_key}"
 
-    def publish_health_checks(self, health_checks: List[HealthCheckState], dry_run=False) -> SyncStats:
-        stats = SyncStats()
+    def publish_health_checks(self, health_checks: List[HealthCheckState], dry_run=False, stats=SyncStats()) -> SyncStats:
         stats.checks = len(health_checks)
+        if stats.checks == 0:
+            return stats
         payload = self._prepare_health_sync_payload(health_checks)
         return self._post_data(payload, dry_run, stats)
 
-    def publish(self, components: List[Component], relations: List[Relation], dry_run=False) -> SyncStats:
-        stats = SyncStats()
+    def publish(self, components: List[Component], relations: List[Relation], dry_run=False, stats=SyncStats()) -> SyncStats:
         stats.components = len(components)
         stats.relations = len(relations)
+        if stats.components == 0:
+            return stats
         payload = self._prepare_topo_payload(components, relations)
         return self._post_data(payload, dry_run, stats)
 
     def _post_data(self, payload: ReceiverApi, dry_run: bool, stats: SyncStats) -> SyncStats:
         if dry_run:
-            stats.payload = json.dumps(payload.to_primitive(), indent=4)
+            stats.payloads.append(json.dumps(payload.to_primitive(), indent=4))
             return stats
         serialized_payload = json.dumps(payload.to_primitive())
 

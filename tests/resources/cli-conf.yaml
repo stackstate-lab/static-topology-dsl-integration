@@ -1,0 +1,17 @@
+
+stackstate:
+  receiver_url: https://k8sdemo.demo.stackstate.io/receiver
+  api_key: xxx
+  # This is used as a postfix to 'static_topo_dsl/' and should be used as the source identifier in StackState integrations when
+  # creating a Custom Synchronzation instance.
+  instance_type: static_topo_dsl
+  instance_url: static_topo_demo
+  health_sync:
+    source_name: static_health
+    stream_id: "static_health:topo"   # unique id representing this stream instance
+    expiry_interval_seconds: 0        # Never
+    repeat_interval_seconds: 1800      # 30 Minutes
+  internal_hostname: localhost
+
+topo_files:
+  - ./share/topologies

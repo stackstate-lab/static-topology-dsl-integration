@@ -3,6 +3,13 @@ name = "sts_static_topology"
 version = "0.1.0"
 description = ""
 authors = ["Ravan Naidoo <rnaidoo@stackstate.com>"]
+packages = [
+    { include = "static_topo_impl", from = "src/sts_static_topology" }
+]
+
+[tool.poetry.scripts]
+ststopo = "static_topo_impl.cli.main:main"
+
 
 [tool.poetry.dependencies]
 python = ">=2.7,<3.0.0 || >=3.7.0,<4"
