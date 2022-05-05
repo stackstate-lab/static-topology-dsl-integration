@@ -3,7 +3,7 @@ from stackstate_checks.base import (AgentCheck, ConfigurationError,
                                     HealthStream, HealthStreamUrn,
                                     TopologyInstance)
 from static_topo_impl.model.instance import InstanceInfo
-from static_topo_impl.processor import Processor
+from static_topo_impl.agent_processor import AgentProcessor
 
 
 class StaticTopologyDslCheck(AgentCheck):
@@ -25,7 +25,7 @@ class StaticTopologyDslCheck(AgentCheck):
         return TopologyInstance(instance_type, instance_url)
 
     def check(self, instance):
-        Processor(instance, self).process()
+        AgentProcessor(instance, self).process()
 
     def get_health_stream(self, instance):
         return HealthStream(HealthStreamUrn(instance.instance_type, "static_health"), expiry_seconds=0)

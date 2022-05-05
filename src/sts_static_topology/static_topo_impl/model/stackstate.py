@@ -11,10 +11,28 @@ class AnyType(BaseType):
         super(AnyType, self).__init__(**kwargs)
 
 
+class ComponentType(Model):
+    name: str = StringType(required=True)
+
+
 class Relation(Model):
-    target_id: str = StringType(required=True)
-    source_id: str = StringType(required=True)
-    rel_type: str = StringType(required=True, default="uses")
+    external_id: str = StringType(required=True, serialized_name="externalId")
+    relation_type: ComponentType = ModelType(ComponentType, serialized_name="type")
+    source_id: str = StringType(required=True, serialized_name="sourceId")
+    target_id: str = StringType(required=True, serialized_name="targetId")
+    properties: Dict[str, Any] = DictType(AnyType(), required=True, default={"labels": []}, serialized_name="data")
+
+    def set_type(self, name: str):
+        if self.relation_type is None:
+            self.relation_type = ComponentType({"name": name})
+        else:
+            self.relation_type.name = name
+
+    def get_type(self) -> str:
+        if self.relation_type is None:
+            return ""
+        else:
+            return self.relation_type.name
 
 
 class ComponentProperties(Model):
@@ -50,19 +68,25 @@ class ComponentProperties(Model):
         self.labels = list(labels)
 
 
-class Health(Model):
-    check_state_id: str = StringType(required=True)
-    name: str = StringType(required=True)
-    topology_element_identifier: str = StringType(required=True)
-    health_value: str = StringType(required=True, choices=["CLEAR", "DEVIATING", "CRITICAL"])
-    message: str = StringType(default="")
-
-
 class Component(Model):
-    uid: str = StringType(required=True)
-    component_type: str = StringType(required=True)
-    properties: ComponentProperties = ModelType(ComponentProperties, required=True, default=ComponentProperties())
+    uid: str = StringType(required=True, serialized_name="externalId")
+    component_type: ComponentType = ModelType(ComponentType, serialized_name="type")
+    properties: ComponentProperties = ModelType(
+        ComponentProperties, required=True, default=ComponentProperties(), serialized_name="data"
+    )
     relations: List[Relation] = ListType(ModelType(Relation), default=[])
+
+    class Options:
+        roles = {"public": blacklist("relations")}
+
+    def set_type(self, name: str):
+        if self.component_type is None:
+            self.component_type = ComponentType({"name": name})
+        else:
+            self.component_type.name = name
+
+    def get_type(self) -> str:
+        return self.component_type.name
 
     def get_name(self) -> str:
         return self.properties.name
@@ -70,5 +94,10 @@ class Component(Model):
     def set_name(self, name: str):
         self.properties.name = name
 
-    class Options:
-        roles = {"public": blacklist("relations")}
+
+class HealthCheckState(Model):
+    check_id: str = StringType(required=True, serialized_name="checkStateId")
+    check_name: str = StringType(required=True)
+    topo_identifier: str = StringType(required=True, serialized_name="topologyElementIdentifier")
+    message: str = StringType(required=False)
+    health: str = StringType(required=True, choices=["CLEAR", "DEVIATING", "CRITICAL"])

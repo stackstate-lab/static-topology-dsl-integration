@@ -6,11 +6,11 @@ from static_topo_impl.dsl.interpreter import TopologyInterpreter
 from static_topo_impl.model.factory import TopologyFactory
 from static_topo_impl.model.instance import InstanceInfo
 from static_topo_impl.model.stackstate import Component
-from static_topo_impl.model.stackstate import Health as ComponentHealth
+from static_topo_impl.model.stackstate import HealthCheckState
 from static_topo_impl.model.stackstate import Relation
 
 
-class Processor:
+class AgentProcessor:
     def __init__(self, instance: InstanceInfo, agent_check: AgentCheck):
         self.agent_check = agent_check
         self.log = agent_check.log
@@ -37,11 +37,11 @@ class Processor:
         for c in components:
             c.properties.dedup_labels()
             c_as_dict = c.properties.to_primitive()
-            self.agent_check.component(c.uid, c.component_type, c_as_dict)
+            self.agent_check.component(c.uid, c.get_type(), c_as_dict)
         self.log.info(f"Publishing '{len(self.factory.relations)}' relations")
         relations: List[Relation] = self.factory.relations.values()
         for r in relations:
-            self.agent_check.relation(r.source_id, r.target_id, r.rel_type, {})
+            self.agent_check.relation(r.source_id, r.target_id, r.get_type(), r.properties)
         self.agent_check.stop_snapshot()
         self._publish_health()
 
@@ -49,9 +49,9 @@ class Processor:
         self.log.info(f"Synchronizing  '{len(self.factory.health)}' health states")
         self.agent_check.health.start_snapshot()
         deviating, clear, critical = 0, 0, 0
-        health_instances: List[ComponentHealth] = self.factory.health.values()
+        health_instances: List[HealthCheckState] = self.factory.health.values()
         for health in health_instances:
-            health_value = health.health_value
+            health_value = health.health
             if not isinstance(health_value, Health):
                 health_value = Health[health_value]
             if health_value == Health.CLEAR:
@@ -61,10 +61,10 @@ class Processor:
             elif health_value == Health.DEVIATING:
                 deviating += 1
             self.agent_check.health.check_state(
-                health.check_state_id,
-                health.name,
+                health.check_id,
+                health.check_name,
                 health_value,
-                health.topology_element_identifier,
+                health.topo_identifier,
                 health.message,
             )
         self.log.info(f"Critical -> {critical}, Deviating -> {deviating}, Clear -> {clear}")

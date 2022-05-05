@@ -2,7 +2,7 @@
 
 defaults {
   id ```
-       "urn:%s:%s" % (component.component_type.lower(), component.properties.name)
+       "urn:%s:%s" % (component.get_type().lower(), component.properties.name)
   ```
   environment Prod
   layer Machines

@@ -4,7 +4,7 @@ import attr
 from asteval import Interpreter
 from six import string_types
 from static_topo_impl.model.factory import TopologyFactory
-from static_topo_impl.model.stackstate import Component, Health, Relation
+from static_topo_impl.model.stackstate import Component, HealthCheckState, Relation
 from textx import metamodel_from_str, textx_isinstance
 from textx.metamodel import TextXMetaModel
 from textx.model import TextXSyntaxError
@@ -195,11 +195,11 @@ class TopologyInterpreter:
         for source in components:
             for relation in source.relations:
                 if self.factory.component_exists(relation.target_id):
-                    self.factory.add_relation(relation.source_id, relation.target_id, relation.rel_type)
+                    self.factory.add_relation(relation.source_id, relation.target_id, relation.get_type())
                 else:
                     target_component = self.factory.get_component_by_name(relation.target_id, raise_not_found=False)
                     if target_component:
-                        self.factory.add_relation(relation.source_id, target_component.uid, relation.rel_type)
+                        self.factory.add_relation(relation.source_id, target_component.uid, relation.get_type())
                     else:
                         raise Exception(
                             f"Failed to find related component '{relation.target_id}'. "
@@ -208,16 +208,16 @@ class TopologyInterpreter:
 
     def _interpret_component(self, component_ast, defaults):
         component = Component()
-        component.component_type = component_ast.component_type
+        component.set_type(component_ast.component_type)
         properties = self._index_properties(component_ast.properties)
         ctx = TopologyContext(factory=self.factory, component=component)
         property_interpreter = PropertyInterpreter(
-            properties, defaults, component.component_type, ctx, self.topology_meta
+            properties, defaults, component.get_type(), ctx, self.topology_meta
         )
 
         component.set_name(property_interpreter.get_property("name"))
         if component.get_name() is None:
-            raise Exception(f"Component name is required for '{component.component_type}'.")
+            raise Exception(f"Component name is required for '{component.get_type()}'.")
 
         property_interpreter.source_name = component.get_name()
         component.properties.update_properties(property_interpreter.merge_map_property("data"))
@@ -231,7 +231,7 @@ class TopologyInterpreter:
 
         if component.uid is None:
             raise Exception(
-                "Component id is required for " f"'{property_interpreter.source_name}({component.component_type})'."
+                "Component id is required for " f"'{property_interpreter.source_name}({component.get_type()})'."
             )
 
         self._interpret_health(component, property_interpreter)
@@ -246,9 +246,10 @@ class TopologyInterpreter:
             rel_type = "uses"
             if len(rel_parts) == 2:
                 rel_type = rel_parts[1]
-            component.relations.append(
-                Relation({"source_id": component.uid, "target_id": rel_parts[0], "rel_type": rel_type})
-            )
+            rel_id = f"{component.uid} --> {rel_parts[0]}"
+            relation = Relation({"source_id": component.uid, "target_id": rel_parts[0], "external_id": rel_id})
+            relation.set_type(rel_type)
+            component.relations.append(relation)
 
     def _interpret_health(self, component: Component, property_interpreter: PropertyInterpreter):
         health_info = property_interpreter.get_string_property("health", "HealthCheck|CLEAR")
@@ -260,14 +261,14 @@ class TopologyInterpreter:
         else:
             health_state = health_parts[0]
         health_msg = property_interpreter.get_string_property("healthMessage", "")
-        health = Health()
-        health.name = health_name
-        health.check_state_id = f"{component.get_name()}_static_states"
-        health.topology_element_identifier = component.uid
-        health.health_value = health_state.upper()
+        health = HealthCheckState()
+        health.check_name = health_name
+        health.check_id = f"{component.get_name()}_static_states"
+        health.topo_identifier = component.uid
+        health.health = health_state.upper()
         health.message = health_msg
         health.validate()
-        self.factory.health[health.check_state_id] = health
+        self.factory.health[health.check_id] = health
 
     @staticmethod
     def _index_properties(properties) -> Dict[str, Any]:
