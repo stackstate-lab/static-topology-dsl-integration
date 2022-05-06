@@ -10,7 +10,7 @@ in `.topo` files using a ___Topology Language___.
 
 The topology can be sent to the StackState server via a CLI or configured as an Agent Check.
 
-See (documentation)[https://stackstate-lab.github.io/static-topology-dsl-integration/] for more information.
+See [documentation](https://stackstate-lab.github.io/static-topology-dsl-integration/) for more information.
 
 
 ## Development
