@@ -11,8 +11,6 @@ done
 DOCROOT="$(dirname "$(readlink -f "$0")")"
 BUILDROOT="$DOCROOT/build"
 
-pip install importlib_metadata==4.11.3
-
 echo
 echo 'Building API reference docs'
 echo
@@ -25,7 +23,6 @@ pdoc3 --html \
      --output-dir "$BUILDROOT" \
      static_topo_impl
 popd >/dev/null
-
 
 echo
 echo "All good. Docs in: $BUILDROOT"
