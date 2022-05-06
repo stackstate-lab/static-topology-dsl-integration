@@ -183,7 +183,7 @@ class TopologyInterpreter:
 
     def interpret(self, model) -> TopologyFactory:
         defaults: Dict[str, Any] = {}
-        if hasattr(model, "defaults"):
+        if model.defaults is not None:
             defaults = self._index_properties(model.defaults.properties)
         components_ast = model.components
         for component_ast in components_ast.components:
