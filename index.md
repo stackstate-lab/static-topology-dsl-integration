@@ -253,8 +253,7 @@ Discovered Component and Relation information:
                                 "test"
                             ]
                         }
-                    },
-                    "relations": []
+                    }
                 },
                 {
                     "externalId": "urn:host:test12",
@@ -278,8 +277,7 @@ Discovered Component and Relation information:
                                 "test"
                             ]
                         }
-                    },
-                    "relations": []
+                    }
                 }
             ],
             "relations": [
@@ -309,13 +307,11 @@ Discovered Component and Relation information:
     "health": [
         {
             "start_snapshot": {
-                "expiry_interval_s": 2592000,
                 "repeat_interval_s": 1800
             },
             "stop_snapshot": {},
             "stream": {
                 "urn": "urn:health:static_health:static_health_topo",
-                "sub_stream_id": null
             },
             "check_states": [
                 {
