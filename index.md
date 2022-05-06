@@ -96,7 +96,7 @@ defaults {
     environment Prod
     layer Machines
     domain StaticTopology
-    identifiers [ ```component.uid\``` ]
+    identifiers [ ```component.uid``` ]
     labels [ staticdemo ]
     data {
         myprop myvalue,
