@@ -67,7 +67,7 @@ See API Documentation
 - [Factory](./api/model/factory.html)
 
 
-### `processor` Code Property
+### Processor Code Property
 
 Define a `processor` property on the component or in the `defaults` as a code snippet.
 Easier to programmatically manipulate the component for complex processing.
@@ -86,9 +86,34 @@ For all other properties, if they are defined on the component, the default is i
 A component is defined by first entering the component type followed by opening brackets `(`.
 Define the properties and close with a closing bracket `)`
 
-### Sample `.topo`
+### Sample Topology
 
-See [sample.topo](./tests/resources/share/topologies/sample.topo)
+```
+defaults {
+    id ```
+       "urn:%s:%s" % (component.get_type().lower(), component.properties.name)
+    ```
+    environment Prod
+    layer Machines
+    domain StaticTopology
+    identifiers [ ```component.uid\``` ]
+    labels [ staticdemo ]
+    data {
+        myprop myvalue,
+        myarr [ test ]
+    }
+}
+
+components {
+host (
+    name test
+    labels ["static:test"]
+    relations [ test2, "test3|hosted by"]
+)
+host(name test2, health CRITICAL)
+host(name test3)
+}
+```
 
 ## Installation
 
