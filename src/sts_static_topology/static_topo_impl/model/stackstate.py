@@ -1,7 +1,7 @@
 from typing import Any, Dict, List
 
 from schematics import Model
-from schematics.transforms import blacklist
+from schematics.transforms import blacklist, wholelist
 from schematics.types import (BaseType, DictType, ListType, ModelType,
                               StringType)
 
@@ -14,6 +14,9 @@ class AnyType(BaseType):
 class ComponentType(Model):
     name: str = StringType(required=True)
 
+    class Options:
+        roles = {"public": wholelist()}
+
 
 class Relation(Model):
     external_id: str = StringType(required=True, serialized_name="externalId")
@@ -21,6 +24,9 @@ class Relation(Model):
     source_id: str = StringType(required=True, serialized_name="sourceId")
     target_id: str = StringType(required=True, serialized_name="targetId")
     properties: Dict[str, Any] = DictType(AnyType(), required=True, default={"labels": []}, serialized_name="data")
+
+    class Options:
+        roles = {"public": wholelist()}
 
     def set_type(self, name: str):
         if self.relation_type is None:
@@ -43,6 +49,9 @@ class ComponentProperties(Model):
     labels: List[str] = ListType(StringType(), default=[])
     identifiers: List[str] = ListType(StringType(), default=[])
     custom_properties: Dict[str, Any] = DictType(AnyType(), default={})
+
+    class Options:
+        roles = {"public": wholelist()}
 
     def add_label(self, label: str):
         self.labels.append(label)
@@ -101,3 +110,6 @@ class HealthCheckState(Model):
     topo_identifier: str = StringType(required=True, serialized_name="topologyElementIdentifier")
     message: str = StringType(required=False)
     health: str = StringType(required=True, choices=["CLEAR", "DEVIATING", "CRITICAL"])
+
+    class Options:
+        roles = {"public": wholelist()}

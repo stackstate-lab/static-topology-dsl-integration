@@ -1,15 +1,20 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from schematics import Model
-from schematics.types import BooleanType, DictType, IntType, ListType, ModelType, StringType, TimestampType
-
-from static_topo_impl.model.stackstate import Component, Relation, HealthCheckState, AnyType
+from schematics.transforms import wholelist
+from schematics.types import (BooleanType, DictType, IntType, ListType,
+                              ModelType, StringType, TimestampType)
+from static_topo_impl.model.stackstate import (AnyType, Component,
+                                               HealthCheckState, Relation)
 
 
 class Instance(Model):
     instance_type: str = StringType(required=True, serialized_name="type")
     url: str = StringType(required=True)
+
+    class Options:
+        roles = {"public": wholelist()}
 
 
 class TopologySync(Model):
@@ -20,15 +25,24 @@ class TopologySync(Model):
     components: List[Component] = ListType(ModelType(Component), default=[])
     relations: List[Relation] = ListType(ModelType(Relation), default=[])
 
+    class Options:
+        roles = {"public": wholelist()}
+
 
 class HealthSyncStartSnapshot(Model):
-    expiry_interval_s: int = IntType(required=True, default=3600)  # 1 Hour
+    expiry_interval_s: int = IntType()
     repeat_interval_s: int = IntType(required=True, default=1800)  # 30 Minutes
+
+    class Options:
+        roles = {"public": wholelist()}
 
 
 class HealthStream(Model):
     urn: str = StringType(required=True)
     sub_stream_id: str = StringType()
+
+    class Options:
+        roles = {"public": wholelist()}
 
 
 class HealthSync(Model):
@@ -36,6 +50,9 @@ class HealthSync(Model):
     stop_snapshot: Dict[str, Any] = DictType(AnyType, required=True, default={})
     stream: HealthStream = ModelType(HealthStream, required=True)
     check_states: List[HealthCheckState] = ListType(ModelType(HealthCheckState), default=[])
+
+    class Options:
+        roles = {"public": wholelist()}
 
 
 class ReceiverApi(Model):
@@ -47,6 +64,9 @@ class ReceiverApi(Model):
     service_checks: List[Any] = ListType(AnyType(), default=[])
     health: List[HealthSync] = ListType(ModelType(HealthSync), default=[])
     topologies: List[TopologySync] = ListType(ModelType(TopologySync), default=[])
+
+    class Options:
+        roles = {"public": wholelist()}
 
 
 class SyncStats(Model):

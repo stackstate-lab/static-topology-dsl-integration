@@ -37,9 +37,9 @@ class StackStateClient:
 
     def _post_data(self, payload: ReceiverApi, dry_run: bool, stats: SyncStats) -> SyncStats:
         if dry_run:
-            stats.payloads.append(json.dumps(payload.to_primitive(), indent=4))
+            stats.payloads.append(json.dumps(payload.to_primitive(role="public"), indent=4))
             return stats
-        serialized_payload = json.dumps(payload.to_primitive())
+        serialized_payload = json.dumps(payload.to_primitive(role="public"))
 
         zipped = zlib.compress(serialized_payload.encode("utf-8"))
         logging.debug(
