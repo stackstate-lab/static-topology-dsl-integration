@@ -33,16 +33,16 @@ Components are defined in the `components` section.  Any component property can 
 
 ### Component Properties
 
-| Name          | Type   | Comments                                          | 
-|---------------|--------|---------------------------------------------------|
-| id            | string | Defaults to `urm:<type>:<name>` when not defined  |
-| name          | string | Required                                          |
-| layer         | string | Defaults to `unknown`                             |
-| domain        | string | Defaults to `unknown`                             |
-| labels        | list   | Optional                                          |
-| identifiers   | list   | Defaults to id when no identifiers defined        |
-| health        | string | Valid values are CRITICAL, DEVIATING, CLEAR       |
-| healthMessage | string | Optional                                          |
+| Name          | Type   | Comments                                         | 
+|---------------|--------|--------------------------------------------------|
+| id            | string | Defaults to `urn:<type>:<name>` when not defined |
+| name          | string | Required                                         |
+| layer         | string | Defaults to `unknown`                            |
+| domain        | string | Defaults to `unknown`                            |
+| labels        | list   | Optional                                         |
+| identifiers   | list   | Defaults to id when no identifiers defined       |
+| health        | string | Valid values are CRITICAL, DEVIATING, CLEAR      |
+| healthMessage | string | Optional                                         |
 
 ### Property types
 
