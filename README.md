@@ -125,9 +125,10 @@ $ ststopo --help
 Usage: ststopo [OPTIONS]
 
 Options:
-  -f, --conf TEXT   Configuration yaml file
+  -f, --conf  TEXT  Configuration yaml file
   --log-level TEXT  Log Level
   --dry-run         Dry run static topology creation
+  --work-dir  TEXT  Set the current working directory
   --help            Show this message and exit.
 ```
 
@@ -157,7 +158,7 @@ You can copy [sample.topo](./tests/resources/share/topologies/sample.topo) to `.
 
 ```bash
 $ mkdir -p ./share/topologies
-$ curl https://raw.githubusercontent.com/stackstate-lab/static-topology-dsl-integration/master/tests/resources/share/topologies/sample.topo -o ./share/topologies/sample.topo
+$ curl -L https://raw.githubusercontent.com/stackstate-lab/static-topology-dsl-integration/master/tests/resources/share/topologies/sample.topo -o ./share/topologies/sample.topo
 $ ststopo --dry-run   
 ```
 <details>
@@ -314,7 +315,7 @@ Download Static Topology DSL agent check [release](https://github.com/stackstate
 to the machine running the StackState Agent.
 
 ```bash
-$ curl -o sts_static_topology-0.1.0.zip https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/v0.1.0/sts_static_topology-0.1.0.zip
+$ curl -o sts_static_topology-0.1.0.zip -L https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/v0.1.0/sts_static_topology-0.1.0.zip
 $ unzip ./sts_static_topology-0.1.0.zip
 $ ./install.sh
 $ cd /etc/stackstate-agent/conf.d/static_topology_dsl.d
