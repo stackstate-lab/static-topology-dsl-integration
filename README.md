@@ -110,12 +110,15 @@ $ virtualenv --version
 $ # Create a virtual environment in a directory of your choosing 
 $ cd project_folder
 $ virtualenv venv
+$ source venv/bin/activate
+$ pip install six requests
 ```
 
 ### Install `ststopo` CLI 
 
+
 ```bash
-python -m pip install https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/v0.1.0/sts_static_topology-0.1.0-py2.py3-none-any.whl
+python -m pip install https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/0.1.0/sts_static_topology-0.1.0-py2.py3-none-any.whl
 ```
 
 The `ststopo` command-line utility reads `.topo` files specified in the `conf.yaml` and sends the resulting Components, Relations and Health to StackState.
@@ -315,7 +318,7 @@ Download Static Topology DSL agent check [release](https://github.com/stackstate
 to the machine running the StackState Agent.
 
 ```bash
-$ curl -o sts_static_topology-0.1.0.zip -L https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/v0.1.0/sts_static_topology-0.1.0.zip
+$ curl -o sts_static_topology-0.1.0.zip -L https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/0.1.0/sts_static_topology-0.1.0.zip
 $ unzip ./sts_static_topology-0.1.0.zip
 $ ./install.sh
 $ cd /etc/stackstate-agent/conf.d/static_topology_dsl.d
