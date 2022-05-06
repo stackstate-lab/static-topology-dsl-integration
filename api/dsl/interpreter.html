@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>static_topo_impl.dsl.interpreter API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>static_topo_impl.dsl.interpreter</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from typing import Any, Dict, List
+
+import attr
+from asteval import Interpreter
+from six import string_types
+from static_topo_impl.model.factory import TopologyFactory
+from static_topo_impl.model.stackstate import (Component, HealthCheckState,
+                                               Relation)
+from textx import metamodel_from_str, textx_isinstance
+from textx.metamodel import TextXMetaModel
+from textx.model import TextXSyntaxError
+
+
+@attr.s(kw_only=True)
+class TopologyContext:
+    factory: TopologyFactory = attr.ib()
+    component: Component = attr.ib()
+
+
+class PropertyInterpreter:
+    def __init__(
+        self,
+        properties: Dict[str, Any],
+        defaults: Dict[str, Any],
+        source_name: str,
+        ctx: TopologyContext,
+        topology_meta: TextXMetaModel,
+    ):
+        self.source_name = source_name
+        self.defaults = defaults
+        self.properties = properties
+        self.ctx = ctx
+        self.topology_meta = topology_meta
+        self.PropertyObjectClass = self.topology_meta[&#34;PropertyObject&#34;]
+        self.PropertyListClass = self.topology_meta[&#34;PropertyList&#34;]
+        self.PropertyCodeClass = self.topology_meta[&#34;PropertyCode&#34;]
+        self.PropertyClass = self.topology_meta[&#34;Property&#34;]
+        self.default_source = &#34;default&#34;
+
+    def get_string_property(self, name: str, default=None) -&gt; str:
+        value = self.get_property_value(name, self.properties, self.source_name, default=None)
+        if value is None:
+            value = self.get_property_value(name, self.defaults, self.default_source, default=default)
+
+        return self._assert_string(value, name, self.source_name)
+
+    def get_property(self, name: str, default=None) -&gt; Any:
+        value = self.get_property_value(name, self.properties, self.source_name, default=None)
+        if value is None:
+            value = self.get_property_value(name, self.defaults, self.default_source, default=default)
+        return value
+
+    def merge_map_property(self, name: str) -&gt; Dict[str, Any]:
+        default_value = self.get_property_value(name, self.defaults, self.default_source, default={})
+        self._assert_dict(default_value, name, self.default_source)
+        map_value = self.get_property_value(name, self.properties, self.source_name, default=None)
+        self._assert_dict(map_value, name, self.source_name)
+        if map_value is None:
+            return default_value
+        else:
+            default_value.update(map_value)
+            return default_value
+
+    def merge_list_property(self, name: str):
+        default_value = self.get_property_value(name, self.defaults, self.default_source, default=[])
+        self._assert_list(default_value, name, self.default_source)
+        list_value = self.get_property_value(name, self.properties, self.source_name, default=None)
+        self._assert_list(list_value, name, self.source_name)
+        if list_value is None:
+            return default_value
+        else:
+            list_value.extend(default_value)
+            return list_value
+
+    def run_processors(self):
+        name = &#34;processor&#34;
+        if self._is_code(name, self.properties):
+            self._run_code(self.properties[name].code, name, self.source_name)
+        if self._is_code(name, self.defaults):
+            self._run_code(self.defaults[name].code, name, self.default_source)
+
+    def get_property_value(self, name: str, properties: Dict[str, Any], source_name: str, default: Any = None) -&gt; Any:
+        value_ast = properties.get(name, default)
+        return self._convert_value(value_ast, name, source_name)
+
+    def _is_code(self, name: str, properties: Dict[str, Any]) -&gt; bool:
+        value_ast = properties.get(name, None)
+        return textx_isinstance(value_ast, self.PropertyCodeClass)
+
+    def _convert_value(self, value_ast: Any, property_name: str, source_name: str) -&gt; Any:
+        if value_ast is None:
+            return None
+        elif textx_isinstance(value_ast, self.PropertyObjectClass):
+            value = {}
+            for member in value_ast.members:
+                value[member.key] = self._convert_value(member.value, property_name, source_name)
+            return value
+        elif textx_isinstance(value_ast, self.PropertyListClass):
+            value_list = []
+            for v in value_ast.values:
+                value_list.append(self._convert_value(v, property_name, source_name))
+            return value_list
+        elif textx_isinstance(value_ast, self.PropertyCodeClass):
+            return self._run_code(value_ast.code, property_name, source_name)
+        else:
+            return value_ast
+
+    @staticmethod
+    def _assert_string(value: Any, name: str, source_name: str) -&gt; str:
+        if value is not None:
+            if not isinstance(value, string_types):
+                raise Exception(f&#34;Expected string type for &#39;{name}&#39;, but was {type(value)} on `{source_name}`&#34;)
+        return value
+
+    @staticmethod
+    def _assert_dict(value: Any, name: str, source_name: str) -&gt; Dict[str, Any]:
+        if value is not None:
+            if not isinstance(value, dict):
+                raise Exception(f&#34;Expected dict type for &#39;{name}&#39;, but was {type(value)} on `{source_name}`&#34;)
+        return value
+
+    @staticmethod
+    def _assert_list(value: Any, name: str, source_name: str) -&gt; List[Any]:
+        if value is not None:
+            if not isinstance(value, list):
+                raise Exception(f&#34;Expected list type for &#39;{name}&#39;, but was {type(value)} on `{source_name}`&#34;)
+        return value
+
+    def _run_code(self, code: str, property_name, source_name: str) -&gt; Any:
+        aeval = self._get_asteval_interpreter(self.ctx)
+        code = code.strip()
+        if code.endswith(&#34;```&#34;):
+            code = code[:-3]
+        code_lines = code.split(&#34;\n&#34;)
+        # Fix first line indentation
+        if len(code_lines) &gt; 1:
+            padding_count = 0
+            second_line = code_lines[1]
+            for i in range(0, len(second_line)):
+                if second_line[i] != &#34; &#34;:
+                    break
+                padding_count += 1
+            for i in range(1, len(code_lines)):
+                code_lines[i] = code_lines[i][padding_count:]
+        code = &#34;\n&#34;.join(code_lines)
+        value = self._eval_expression(code, aeval, property_name, source_name)
+        return value
+
+    @staticmethod
+    def _get_asteval_interpreter(ctx: TopologyContext) -&gt; Interpreter:
+        aeval = Interpreter()
+        aeval.symtable[&#34;factory&#34;] = ctx.factory
+        aeval.symtable[&#34;component&#34;] = ctx.component
+        return aeval
+
+    @staticmethod
+    def _eval_expression(
+        expression: str, aeval: Interpreter, eval_property: str, source_name: str, fail_on_error: bool = True
+    ):
+        existing_errs = len(aeval.error)
+        result = aeval.eval(expression)
+        if len(aeval.error) &gt; existing_errs and fail_on_error:
+            error_messages = []
+            for err in aeval.error:
+                error_messages.append(err.get_error())
+            raise Exception(
+                f&#34;Failed to evaluate property &#39;{eval_property}&#39; on `{source_name}`. &#34;
+                f&#34;Expression |\n {expression} \n |.\n Errors:\n {error_messages}&#34;
+            )
+        return result
+
+
+class TopologyInterpreter:
+    def __init__(self, factory: TopologyFactory):
+        self.factory = factory
+        self.topology_meta = metamodel_from_str(TOPOLOGY_TX)
+
+    def model_from_file(self, model_file_name: str):
+        try:
+            return self.topology_meta.model_from_file(model_file_name)
+        except TextXSyntaxError as e:
+            raise Exception(e.message)
+
+    def interpret(self, model) -&gt; TopologyFactory:
+        defaults: Dict[str, Any] = {}
+        if hasattr(model, &#34;defaults&#34;):
+            defaults = self._index_properties(model.defaults.properties)
+        components_ast = model.components
+        for component_ast in components_ast.components:
+            self._interpret_component(component_ast, defaults)
+        self._resolve_relations()
+        return self.factory
+
+    def _resolve_relations(self):
+        components: List[Component] = self.factory.components.values()
+        for source in components:
+            for relation in source.relations:
+                if self.factory.component_exists(relation.target_id):
+                    self.factory.add_relation(relation.source_id, relation.target_id, relation.get_type())
+                else:
+                    target_component = self.factory.get_component_by_name(relation.target_id, raise_not_found=False)
+                    if target_component:
+                        self.factory.add_relation(relation.source_id, target_component.uid, relation.get_type())
+                    else:
+                        raise Exception(
+                            f&#34;Failed to find related component &#39;{relation.target_id}&#39;. &#34;
+                            f&#34;Reference from component {source.uid}.&#34;
+                        )
+            source.relations = []
+
+    def _interpret_component(self, component_ast, defaults):
+        component = Component()
+        component.set_type(component_ast.component_type)
+        properties = self._index_properties(component_ast.properties)
+        ctx = TopologyContext(factory=self.factory, component=component)
+        property_interpreter = PropertyInterpreter(properties, defaults, component.get_type(), ctx, self.topology_meta)
+
+        component.set_name(property_interpreter.get_property(&#34;name&#34;))
+        if component.get_name() is None:
+            raise Exception(f&#34;Component name is required for &#39;{component.get_type()}&#39;.&#34;)
+
+        property_interpreter.source_name = component.get_name()
+        component.properties.update_properties(property_interpreter.merge_map_property(&#34;data&#34;))
+        component.properties.layer = property_interpreter.get_string_property(&#34;layer&#34;, &#34;Unknown&#34;)
+        component.properties.domain = property_interpreter.get_string_property(&#34;domain&#34;, &#34;Unknown&#34;)
+        component.properties.environment = property_interpreter.get_string_property(&#34;environment&#34;, &#34;Unknown&#34;)
+        component.properties.labels.extend(property_interpreter.merge_list_property(&#34;labels&#34;))
+        component.uid = property_interpreter.get_string_property(&#34;id&#34;, None)
+        component.properties.identifiers.extend(property_interpreter.merge_list_property(&#34;identifiers&#34;))
+        property_interpreter.run_processors()
+
+        if component.uid is None:
+            raise Exception(
+                &#34;Component id is required for &#34; f&#34;&#39;{property_interpreter.source_name}({component.get_type()})&#39;.&#34;
+            )
+
+        self._interpret_health(component, property_interpreter)
+        self._interpret_relations(component, property_interpreter)
+        self.factory.add_component(component)
+
+    @staticmethod
+    def _interpret_relations(component: Component, property_interpreter: PropertyInterpreter):
+        relations: List[str] = property_interpreter.merge_list_property(&#34;relations&#34;)
+        for relation in relations:
+            rel_parts = relation.split(&#34;|&#34;)
+            rel_type = &#34;uses&#34;
+            if len(rel_parts) == 2:
+                rel_type = rel_parts[1]
+            rel_id = f&#34;{component.uid} --&gt; {rel_parts[0]}&#34;
+            relation = Relation({&#34;source_id&#34;: component.uid, &#34;target_id&#34;: rel_parts[0], &#34;external_id&#34;: rel_id})
+            relation.set_type(rel_type)
+            component.relations.append(relation)
+
+    def _interpret_health(self, component: Component, property_interpreter: PropertyInterpreter):
+        health_info = property_interpreter.get_string_property(&#34;health&#34;, &#34;HealthCheck|CLEAR&#34;)
+        health_parts = health_info.split(&#34;|&#34;)
+        health_name = &#34;HealthCheck&#34;
+        if len(health_parts) == 2:
+            health_name = health_parts[0]
+            health_state = health_parts[1]
+        else:
+            health_state = health_parts[0]
+        health_msg = property_interpreter.get_string_property(&#34;healthMessage&#34;, &#34;&#34;)
+        health = HealthCheckState()
+        health.check_name = health_name
+        health.check_id = f&#34;{component.get_name()}_static_states&#34;
+        health.topo_identifier = component.uid
+        health.health = health_state.upper()
+        health.message = health_msg
+        health.validate()
+        self.factory.health[health.check_id] = health
+
+    @staticmethod
+    def _index_properties(properties) -&gt; Dict[str, Any]:
+        index: Dict[str, Any] = {}
+        for p in properties:
+            index[p.name] = p.value
+        return index
+
+
+TOPOLOGY_TX = &#34;&#34;&#34;
+TopologyModel:
+    defaults=Defaults?
+    components=Components
+;
+
+Defaults:
+    &#39;defaults&#39; &#39;{&#39;
+        properties*=Property
+    &#39;}&#39;
+;
+
+Components:
+    &#39;components&#39; &#39;{&#39;
+        components*=Component
+    &#39;}&#39;
+;
+
+Component:
+    ComponentMultiline | ComponentInline
+;
+
+ComponentMultiline:
+   component_type=ComponentType &#34;(&#34; properties*=Property &#34;)&#34;
+;
+
+ComponentInline:
+   component_type=ComponentType &#34;(&#34; properties*=Property[&#39;,&#39;] &#34;)&#34;
+;
+
+ComponentType:
+    /[^\\d\\W][\\w.\\s]*\\b/
+
+;
+
+Property:
+  name=PropertyKeyword value=PropertyValue
+;
+
+PropertyKeyword:
+     &#39;identifiers&#39; | &#39;id&#39; | &#39;name&#39; | &#39;layer&#39; | &#39;domain&#39; | &#39;environment&#39; | &#39;labels&#39; | &#39;processor&#39; | &#39;data&#39; |
+     &#39;relations&#39; | &#39;healthMessage&#39; |&#39;health&#39;
+;
+
+PropertyString:
+    ID | STRING
+;
+
+PropertyValue:
+    PropertyString | FLOAT | INT |BOOL | PropertyObject | PropertyList | PropertyCode
+;
+
+PropertyList:
+    &#39;[&#39; values*=PropertyValue[&#39;,&#39;] &#39;]&#39;
+;
+
+PropertyObject:
+    &#34;{&#34; members*=PropertyMember[&#39;,&#39;] &#34;}&#34;
+;
+
+PropertyCode:
+   &#34;```&#34; code=/(?ms)(.*?)[`]{3}/
+;
+
+PropertyMember:
+    key=ID  value=PropertyValue
+;
+
+Comment:
+  /#.*$/
+;
+&#34;&#34;&#34;</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="static_topo_impl.dsl.interpreter.PropertyInterpreter"><code class="flex name class">
+<span>class <span class="ident">PropertyInterpreter</span></span>
+<span>(</span><span>properties: Dict[str, Any], defaults: Dict[str, Any], source_name: str, ctx: <a title="static_topo_impl.dsl.interpreter.TopologyContext" href="#static_topo_impl.dsl.interpreter.TopologyContext">TopologyContext</a>, topology_meta: textx.metamodel.TextXMetaModel)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PropertyInterpreter:
+    def __init__(
+        self,
+        properties: Dict[str, Any],
+        defaults: Dict[str, Any],
+        source_name: str,
+        ctx: TopologyContext,
+        topology_meta: TextXMetaModel,
+    ):
+        self.source_name = source_name
+        self.defaults = defaults
+        self.properties = properties
+        self.ctx = ctx
+        self.topology_meta = topology_meta
+        self.PropertyObjectClass = self.topology_meta[&#34;PropertyObject&#34;]
+        self.PropertyListClass = self.topology_meta[&#34;PropertyList&#34;]
+        self.PropertyCodeClass = self.topology_meta[&#34;PropertyCode&#34;]
+        self.PropertyClass = self.topology_meta[&#34;Property&#34;]
+        self.default_source = &#34;default&#34;
+
+    def get_string_property(self, name: str, default=None) -&gt; str:
+        value = self.get_property_value(name, self.properties, self.source_name, default=None)
+        if value is None:
+            value = self.get_property_value(name, self.defaults, self.default_source, default=default)
+
+        return self._assert_string(value, name, self.source_name)
+
+    def get_property(self, name: str, default=None) -&gt; Any:
+        value = self.get_property_value(name, self.properties, self.source_name, default=None)
+        if value is None:
+            value = self.get_property_value(name, self.defaults, self.default_source, default=default)
+        return value
+
+    def merge_map_property(self, name: str) -&gt; Dict[str, Any]:
+        default_value = self.get_property_value(name, self.defaults, self.default_source, default={})
+        self._assert_dict(default_value, name, self.default_source)
+        map_value = self.get_property_value(name, self.properties, self.source_name, default=None)
+        self._assert_dict(map_value, name, self.source_name)
+        if map_value is None:
+            return default_value
+        else:
+            default_value.update(map_value)
+            return default_value
+
+    def merge_list_property(self, name: str):
+        default_value = self.get_property_value(name, self.defaults, self.default_source, default=[])
+        self._assert_list(default_value, name, self.default_source)
+        list_value = self.get_property_value(name, self.properties, self.source_name, default=None)
+        self._assert_list(list_value, name, self.source_name)
+        if list_value is None:
+            return default_value
+        else:
+            list_value.extend(default_value)
+            return list_value
+
+    def run_processors(self):
+        name = &#34;processor&#34;
+        if self._is_code(name, self.properties):
+            self._run_code(self.properties[name].code, name, self.source_name)
+        if self._is_code(name, self.defaults):
+            self._run_code(self.defaults[name].code, name, self.default_source)
+
+    def get_property_value(self, name: str, properties: Dict[str, Any], source_name: str, default: Any = None) -&gt; Any:
+        value_ast = properties.get(name, default)
+        return self._convert_value(value_ast, name, source_name)
+
+    def _is_code(self, name: str, properties: Dict[str, Any]) -&gt; bool:
+        value_ast = properties.get(name, None)
+        return textx_isinstance(value_ast, self.PropertyCodeClass)
+
+    def _convert_value(self, value_ast: Any, property_name: str, source_name: str) -&gt; Any:
+        if value_ast is None:
+            return None
+        elif textx_isinstance(value_ast, self.PropertyObjectClass):
+            value = {}
+            for member in value_ast.members:
+                value[member.key] = self._convert_value(member.value, property_name, source_name)
+            return value
+        elif textx_isinstance(value_ast, self.PropertyListClass):
+            value_list = []
+            for v in value_ast.values:
+                value_list.append(self._convert_value(v, property_name, source_name))
+            return value_list
+        elif textx_isinstance(value_ast, self.PropertyCodeClass):
+            return self._run_code(value_ast.code, property_name, source_name)
+        else:
+            return value_ast
+
+    @staticmethod
+    def _assert_string(value: Any, name: str, source_name: str) -&gt; str:
+        if value is not None:
+            if not isinstance(value, string_types):
+                raise Exception(f&#34;Expected string type for &#39;{name}&#39;, but was {type(value)} on `{source_name}`&#34;)
+        return value
+
+    @staticmethod
+    def _assert_dict(value: Any, name: str, source_name: str) -&gt; Dict[str, Any]:
+        if value is not None:
+            if not isinstance(value, dict):
+                raise Exception(f&#34;Expected dict type for &#39;{name}&#39;, but was {type(value)} on `{source_name}`&#34;)
+        return value
+
+    @staticmethod
+    def _assert_list(value: Any, name: str, source_name: str) -&gt; List[Any]:
+        if value is not None:
+            if not isinstance(value, list):
+                raise Exception(f&#34;Expected list type for &#39;{name}&#39;, but was {type(value)} on `{source_name}`&#34;)
+        return value
+
+    def _run_code(self, code: str, property_name, source_name: str) -&gt; Any:
+        aeval = self._get_asteval_interpreter(self.ctx)
+        code = code.strip()
+        if code.endswith(&#34;```&#34;):
+            code = code[:-3]
+        code_lines = code.split(&#34;\n&#34;)
+        # Fix first line indentation
+        if len(code_lines) &gt; 1:
+            padding_count = 0
+            second_line = code_lines[1]
+            for i in range(0, len(second_line)):
+                if second_line[i] != &#34; &#34;:
+                    break
+                padding_count += 1
+            for i in range(1, len(code_lines)):
+                code_lines[i] = code_lines[i][padding_count:]
+        code = &#34;\n&#34;.join(code_lines)
+        value = self._eval_expression(code, aeval, property_name, source_name)
+        return value
+
+    @staticmethod
+    def _get_asteval_interpreter(ctx: TopologyContext) -&gt; Interpreter:
+        aeval = Interpreter()
+        aeval.symtable[&#34;factory&#34;] = ctx.factory
+        aeval.symtable[&#34;component&#34;] = ctx.component
+        return aeval
+
+    @staticmethod
+    def _eval_expression(
+        expression: str, aeval: Interpreter, eval_property: str, source_name: str, fail_on_error: bool = True
+    ):
+        existing_errs = len(aeval.error)
+        result = aeval.eval(expression)
+        if len(aeval.error) &gt; existing_errs and fail_on_error:
+            error_messages = []
+            for err in aeval.error:
+                error_messages.append(err.get_error())
+            raise Exception(
+                f&#34;Failed to evaluate property &#39;{eval_property}&#39; on `{source_name}`. &#34;
+                f&#34;Expression |\n {expression} \n |.\n Errors:\n {error_messages}&#34;
+            )
+        return result</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="static_topo_impl.dsl.interpreter.PropertyInterpreter.get_property"><code class="name flex">
+<span>def <span class="ident">get_property</span></span>(<span>self, name: str, default=None) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_property(self, name: str, default=None) -&gt; Any:
+    value = self.get_property_value(name, self.properties, self.source_name, default=None)
+    if value is None:
+        value = self.get_property_value(name, self.defaults, self.default_source, default=default)
+    return value</code></pre>
+</details>
+</dd>
+<dt id="static_topo_impl.dsl.interpreter.PropertyInterpreter.get_property_value"><code class="name flex">
+<span>def <span class="ident">get_property_value</span></span>(<span>self, name: str, properties: Dict[str, Any], source_name: str, default: Any = None) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_property_value(self, name: str, properties: Dict[str, Any], source_name: str, default: Any = None) -&gt; Any:
+    value_ast = properties.get(name, default)
+    return self._convert_value(value_ast, name, source_name)</code></pre>
+</details>
+</dd>
+<dt id="static_topo_impl.dsl.interpreter.PropertyInterpreter.get_string_property"><code class="name flex">
+<span>def <span class="ident">get_string_property</span></span>(<span>self, name: str, default=None) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_string_property(self, name: str, default=None) -&gt; str:
+    value = self.get_property_value(name, self.properties, self.source_name, default=None)
+    if value is None:
+        value = self.get_property_value(name, self.defaults, self.default_source, default=default)
+
+    return self._assert_string(value, name, self.source_name)</code></pre>
+</details>
+</dd>
+<dt id="static_topo_impl.dsl.interpreter.PropertyInterpreter.merge_list_property"><code class="name flex">
+<span>def <span class="ident">merge_list_property</span></span>(<span>self, name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def merge_list_property(self, name: str):
+    default_value = self.get_property_value(name, self.defaults, self.default_source, default=[])
+    self._assert_list(default_value, name, self.default_source)
+    list_value = self.get_property_value(name, self.properties, self.source_name, default=None)
+    self._assert_list(list_value, name, self.source_name)
+    if list_value is None:
+        return default_value
+    else:
+        list_value.extend(default_value)
+        return list_value</code></pre>
+</details>
+</dd>
+<dt id="static_topo_impl.dsl.interpreter.PropertyInterpreter.merge_map_property"><code class="name flex">
+<span>def <span class="ident">merge_map_property</span></span>(<span>self, name: str) ‑> Dict[str, Any]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def merge_map_property(self, name: str) -&gt; Dict[str, Any]:
+    default_value = self.get_property_value(name, self.defaults, self.default_source, default={})
+    self._assert_dict(default_value, name, self.default_source)
+    map_value = self.get_property_value(name, self.properties, self.source_name, default=None)
+    self._assert_dict(map_value, name, self.source_name)
+    if map_value is None:
+        return default_value
+    else:
+        default_value.update(map_value)
+        return default_value</code></pre>
+</details>
+</dd>
+<dt id="static_topo_impl.dsl.interpreter.PropertyInterpreter.run_processors"><code class="name flex">
+<span>def <span class="ident">run_processors</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run_processors(self):
+    name = &#34;processor&#34;
+    if self._is_code(name, self.properties):
+        self._run_code(self.properties[name].code, name, self.source_name)
+    if self._is_code(name, self.defaults):
+        self._run_code(self.defaults[name].code, name, self.default_source)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="static_topo_impl.dsl.interpreter.TopologyContext"><code class="flex name class">
+<span>class <span class="ident">TopologyContext</span></span>
+<span>(</span><span>*, factory: <a title="static_topo_impl.model.factory.TopologyFactory" href="../model/factory.html#static_topo_impl.model.factory.TopologyFactory">TopologyFactory</a>, component: <a title="static_topo_impl.model.stackstate.Component" href="../model/stackstate.html#static_topo_impl.model.stackstate.Component">Component</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Method generated by attrs for class TopologyContext.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TopologyContext:
+    factory: TopologyFactory = attr.ib()
+    component: Component = attr.ib()</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="static_topo_impl.dsl.interpreter.TopologyContext.component"><code class="name">var <span class="ident">component</span> : <a title="static_topo_impl.model.stackstate.Component" href="../model/stackstate.html#static_topo_impl.model.stackstate.Component">Component</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.dsl.interpreter.TopologyContext.factory"><code class="name">var <span class="ident">factory</span> : <a title="static_topo_impl.model.factory.TopologyFactory" href="../model/factory.html#static_topo_impl.model.factory.TopologyFactory">TopologyFactory</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="static_topo_impl.dsl.interpreter.TopologyInterpreter"><code class="flex name class">
+<span>class <span class="ident">TopologyInterpreter</span></span>
+<span>(</span><span>factory: <a title="static_topo_impl.model.factory.TopologyFactory" href="../model/factory.html#static_topo_impl.model.factory.TopologyFactory">TopologyFactory</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TopologyInterpreter:
+    def __init__(self, factory: TopologyFactory):
+        self.factory = factory
+        self.topology_meta = metamodel_from_str(TOPOLOGY_TX)
+
+    def model_from_file(self, model_file_name: str):
+        try:
+            return self.topology_meta.model_from_file(model_file_name)
+        except TextXSyntaxError as e:
+            raise Exception(e.message)
+
+    def interpret(self, model) -&gt; TopologyFactory:
+        defaults: Dict[str, Any] = {}
+        if hasattr(model, &#34;defaults&#34;):
+            defaults = self._index_properties(model.defaults.properties)
+        components_ast = model.components
+        for component_ast in components_ast.components:
+            self._interpret_component(component_ast, defaults)
+        self._resolve_relations()
+        return self.factory
+
+    def _resolve_relations(self):
+        components: List[Component] = self.factory.components.values()
+        for source in components:
+            for relation in source.relations:
+                if self.factory.component_exists(relation.target_id):
+                    self.factory.add_relation(relation.source_id, relation.target_id, relation.get_type())
+                else:
+                    target_component = self.factory.get_component_by_name(relation.target_id, raise_not_found=False)
+                    if target_component:
+                        self.factory.add_relation(relation.source_id, target_component.uid, relation.get_type())
+                    else:
+                        raise Exception(
+                            f&#34;Failed to find related component &#39;{relation.target_id}&#39;. &#34;
+                            f&#34;Reference from component {source.uid}.&#34;
+                        )
+            source.relations = []
+
+    def _interpret_component(self, component_ast, defaults):
+        component = Component()
+        component.set_type(component_ast.component_type)
+        properties = self._index_properties(component_ast.properties)
+        ctx = TopologyContext(factory=self.factory, component=component)
+        property_interpreter = PropertyInterpreter(properties, defaults, component.get_type(), ctx, self.topology_meta)
+
+        component.set_name(property_interpreter.get_property(&#34;name&#34;))
+        if component.get_name() is None:
+            raise Exception(f&#34;Component name is required for &#39;{component.get_type()}&#39;.&#34;)
+
+        property_interpreter.source_name = component.get_name()
+        component.properties.update_properties(property_interpreter.merge_map_property(&#34;data&#34;))
+        component.properties.layer = property_interpreter.get_string_property(&#34;layer&#34;, &#34;Unknown&#34;)
+        component.properties.domain = property_interpreter.get_string_property(&#34;domain&#34;, &#34;Unknown&#34;)
+        component.properties.environment = property_interpreter.get_string_property(&#34;environment&#34;, &#34;Unknown&#34;)
+        component.properties.labels.extend(property_interpreter.merge_list_property(&#34;labels&#34;))
+        component.uid = property_interpreter.get_string_property(&#34;id&#34;, None)
+        component.properties.identifiers.extend(property_interpreter.merge_list_property(&#34;identifiers&#34;))
+        property_interpreter.run_processors()
+
+        if component.uid is None:
+            raise Exception(
+                &#34;Component id is required for &#34; f&#34;&#39;{property_interpreter.source_name}({component.get_type()})&#39;.&#34;
+            )
+
+        self._interpret_health(component, property_interpreter)
+        self._interpret_relations(component, property_interpreter)
+        self.factory.add_component(component)
+
+    @staticmethod
+    def _interpret_relations(component: Component, property_interpreter: PropertyInterpreter):
+        relations: List[str] = property_interpreter.merge_list_property(&#34;relations&#34;)
+        for relation in relations:
+            rel_parts = relation.split(&#34;|&#34;)
+            rel_type = &#34;uses&#34;
+            if len(rel_parts) == 2:
+                rel_type = rel_parts[1]
+            rel_id = f&#34;{component.uid} --&gt; {rel_parts[0]}&#34;
+            relation = Relation({&#34;source_id&#34;: component.uid, &#34;target_id&#34;: rel_parts[0], &#34;external_id&#34;: rel_id})
+            relation.set_type(rel_type)
+            component.relations.append(relation)
+
+    def _interpret_health(self, component: Component, property_interpreter: PropertyInterpreter):
+        health_info = property_interpreter.get_string_property(&#34;health&#34;, &#34;HealthCheck|CLEAR&#34;)
+        health_parts = health_info.split(&#34;|&#34;)
+        health_name = &#34;HealthCheck&#34;
+        if len(health_parts) == 2:
+            health_name = health_parts[0]
+            health_state = health_parts[1]
+        else:
+            health_state = health_parts[0]
+        health_msg = property_interpreter.get_string_property(&#34;healthMessage&#34;, &#34;&#34;)
+        health = HealthCheckState()
+        health.check_name = health_name
+        health.check_id = f&#34;{component.get_name()}_static_states&#34;
+        health.topo_identifier = component.uid
+        health.health = health_state.upper()
+        health.message = health_msg
+        health.validate()
+        self.factory.health[health.check_id] = health
+
+    @staticmethod
+    def _index_properties(properties) -&gt; Dict[str, Any]:
+        index: Dict[str, Any] = {}
+        for p in properties:
+            index[p.name] = p.value
+        return index</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="static_topo_impl.dsl.interpreter.TopologyInterpreter.interpret"><code class="name flex">
+<span>def <span class="ident">interpret</span></span>(<span>self, model) ‑> <a title="static_topo_impl.model.factory.TopologyFactory" href="../model/factory.html#static_topo_impl.model.factory.TopologyFactory">TopologyFactory</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def interpret(self, model) -&gt; TopologyFactory:
+    defaults: Dict[str, Any] = {}
+    if hasattr(model, &#34;defaults&#34;):
+        defaults = self._index_properties(model.defaults.properties)
+    components_ast = model.components
+    for component_ast in components_ast.components:
+        self._interpret_component(component_ast, defaults)
+    self._resolve_relations()
+    return self.factory</code></pre>
+</details>
+</dd>
+<dt id="static_topo_impl.dsl.interpreter.TopologyInterpreter.model_from_file"><code class="name flex">
+<span>def <span class="ident">model_from_file</span></span>(<span>self, model_file_name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def model_from_file(self, model_file_name: str):
+    try:
+        return self.topology_meta.model_from_file(model_file_name)
+    except TextXSyntaxError as e:
+        raise Exception(e.message)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="static_topo_impl.dsl" href="index.html">static_topo_impl.dsl</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="static_topo_impl.dsl.interpreter.PropertyInterpreter" href="#static_topo_impl.dsl.interpreter.PropertyInterpreter">PropertyInterpreter</a></code></h4>
+<ul class="two-column">
+<li><code><a title="static_topo_impl.dsl.interpreter.PropertyInterpreter.get_property" href="#static_topo_impl.dsl.interpreter.PropertyInterpreter.get_property">get_property</a></code></li>
+<li><code><a title="static_topo_impl.dsl.interpreter.PropertyInterpreter.get_property_value" href="#static_topo_impl.dsl.interpreter.PropertyInterpreter.get_property_value">get_property_value</a></code></li>
+<li><code><a title="static_topo_impl.dsl.interpreter.PropertyInterpreter.get_string_property" href="#static_topo_impl.dsl.interpreter.PropertyInterpreter.get_string_property">get_string_property</a></code></li>
+<li><code><a title="static_topo_impl.dsl.interpreter.PropertyInterpreter.merge_list_property" href="#static_topo_impl.dsl.interpreter.PropertyInterpreter.merge_list_property">merge_list_property</a></code></li>
+<li><code><a title="static_topo_impl.dsl.interpreter.PropertyInterpreter.merge_map_property" href="#static_topo_impl.dsl.interpreter.PropertyInterpreter.merge_map_property">merge_map_property</a></code></li>
+<li><code><a title="static_topo_impl.dsl.interpreter.PropertyInterpreter.run_processors" href="#static_topo_impl.dsl.interpreter.PropertyInterpreter.run_processors">run_processors</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="static_topo_impl.dsl.interpreter.TopologyContext" href="#static_topo_impl.dsl.interpreter.TopologyContext">TopologyContext</a></code></h4>
+<ul class="">
+<li><code><a title="static_topo_impl.dsl.interpreter.TopologyContext.component" href="#static_topo_impl.dsl.interpreter.TopologyContext.component">component</a></code></li>
+<li><code><a title="static_topo_impl.dsl.interpreter.TopologyContext.factory" href="#static_topo_impl.dsl.interpreter.TopologyContext.factory">factory</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="static_topo_impl.dsl.interpreter.TopologyInterpreter" href="#static_topo_impl.dsl.interpreter.TopologyInterpreter">TopologyInterpreter</a></code></h4>
+<ul class="">
+<li><code><a title="static_topo_impl.dsl.interpreter.TopologyInterpreter.interpret" href="#static_topo_impl.dsl.interpreter.TopologyInterpreter.interpret">interpret</a></code></li>
+<li><code><a title="static_topo_impl.dsl.interpreter.TopologyInterpreter.model_from_file" href="#static_topo_impl.dsl.interpreter.TopologyInterpreter.model_from_file">model_from_file</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

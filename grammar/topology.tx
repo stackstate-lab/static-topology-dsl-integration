@@ -1,0 +1,69 @@
+TopologyModel:
+    defaults=Defaults?
+    components=Components
+;
+
+Defaults:
+    'defaults' '{'
+        properties*=Property
+    '}'
+;
+
+Components:
+    'components' '{'
+        components*=Component
+    '}'
+;
+
+Component:
+    ComponentMultiline | ComponentInline
+;
+
+ComponentMultiline:
+   component_type=ComponentType "(" properties*=Property ")"
+;
+
+ComponentInline:
+   component_type=ComponentType "(" properties*=Property[','] ")"
+;
+
+ComponentType:
+    /[^\d\W][\w.\s]*\b/
+;
+
+Property:
+  name=PropertyKeyword value=PropertyValue
+;
+
+PropertyKeyword:
+     'identifiers' | 'id' | 'name' | 'layer' | 'domain' | 'environment' | 'labels' | 'processor' | 'data' |
+     'relations' | 'healthMessage' |'health'
+;
+
+PropertyString:
+    ID | STRING
+;
+
+PropertyValue:
+    PropertyString | FLOAT | INT | BOOL | PropertyObject | PropertyList | PropertyCode
+;
+
+PropertyList:
+    '[' values*=PropertyValue[','] ']'
+;
+
+PropertyObject:
+    "{" members*=PropertyMember[','] "}"
+;
+
+PropertyCode:
+   "```" code=/(?ms)(.*?)[`]{3}/
+;
+
+PropertyMember:
+    key=ID  value=PropertyValue
+;
+
+Comment:
+  /#.*$/
+;

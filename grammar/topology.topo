@@ -1,0 +1,38 @@
+
+defaults {
+  # Define inline python code to generate values
+  id ```
+       "urn:%s:%s" % (component.get_type().lower(), component.properties.name)
+  ```
+  environment Prod
+  layer Test
+  identifiers [ "test", "so cool" ]
+  labels [ withoutquotes, 'within:quotes']
+  data {
+    myprop myvalu,
+    myarr [ test ]
+  }
+}
+
+components {
+  Host(
+    name test
+    environment xxx
+    layer xxx
+    # List values can be code snippets also
+    labels [```"s"```]
+    processor ```
+      print("Helloword")
+      y = 10 + 10
+      def func(x):
+        print("hi")
+    ```
+    relations [ test2, "test3|hosted by"]
+  )
+
+  # Lets add component type with spaces in name
+  Host In line(id test2, name test2, environment xxx, layer xxx)
+
+  # Lets add component type with dot in name
+  Host.dot.line(id test3, name test3, environment xxx, layer xxx)
+}
