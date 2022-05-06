@@ -230,9 +230,10 @@ class TopologyInterpreter:
         property_interpreter.run_processors()
 
         if component.uid is None:
-            raise Exception(
-                "Component id is required for " f"'{property_interpreter.source_name}({component.get_type()})'."
-            )
+            component.uid = f"urn:{component.get_type().lower()}:{component.get_name().lower()}"
+
+        if len(component.properties.identifiers) == 0:
+            component.properties.identifiers.append(component.uid)
 
         self._interpret_health(component, property_interpreter)
         self._interpret_relations(component, property_interpreter)
@@ -252,6 +253,9 @@ class TopologyInterpreter:
             component.relations.append(relation)
 
     def _interpret_health(self, component: Component, property_interpreter: PropertyInterpreter):
+        cid = component.uid
+        if len(component.properties.identifiers) > 0 and cid not in component.properties.identifiers:
+            cid = component.properties.identifiers[0]
         health_info = property_interpreter.get_string_property("health", "HealthCheck|CLEAR")
         health_parts = health_info.split("|")
         health_name = "HealthCheck"
@@ -264,7 +268,7 @@ class TopologyInterpreter:
         health = HealthCheckState()
         health.check_name = health_name
         health.check_id = f"{component.get_name()}_static_states"
-        health.topo_identifier = component.uid
+        health.topo_identifier = cid
         health.health = health_state.upper()
         health.message = health_msg
         health.validate()
