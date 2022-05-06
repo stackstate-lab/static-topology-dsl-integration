@@ -35,14 +35,14 @@ Components are defined in the `components` section.  Any component property can 
 
 | Name          | Type   | Comments                                    | 
 |---------------|--------|---------------------------------------------|
-| id            | string |                                             |
-| name          | string |                                             |
-| layer         | string |                                             |
-| domain        | string |                                             |
-| labels        | list   |                                             |
-| identifiers   | list   |                                             |
+| id            | string | Defaults to name when not defined           |
+| name          | string | Required                                    |
+| layer         | string | Defaults to unknown                         |
+| domain        | string | Defaults to unknown                         |
+| labels        | list   | Optional                                    |
+| identifiers   | list   | Defaults to id when no identifiers defined  |
 | health        | string | Valid values are CRITICAL, DEVIATING, CLEAR |
-| healthMessage | string |                                             |
+| healthMessage | string | Optional                                    |
 
 ### Property types
 
