@@ -4,7 +4,8 @@ import attr
 from asteval import Interpreter
 from six import string_types
 from static_topo_impl.model.factory import TopologyFactory
-from static_topo_impl.model.stackstate import Component, HealthCheckState, Relation
+from static_topo_impl.model.stackstate import (Component, HealthCheckState,
+                                               Relation)
 from textx import metamodel_from_str, textx_isinstance
 from textx.metamodel import TextXMetaModel
 from textx.model import TextXSyntaxError
@@ -205,15 +206,14 @@ class TopologyInterpreter:
                             f"Failed to find related component '{relation.target_id}'. "
                             f"Reference from component {source.uid}."
                         )
+            source.relations = []
 
     def _interpret_component(self, component_ast, defaults):
         component = Component()
         component.set_type(component_ast.component_type)
         properties = self._index_properties(component_ast.properties)
         ctx = TopologyContext(factory=self.factory, component=component)
-        property_interpreter = PropertyInterpreter(
-            properties, defaults, component.get_type(), ctx, self.topology_meta
-        )
+        property_interpreter = PropertyInterpreter(properties, defaults, component.get_type(), ctx, self.topology_meta)
 
         component.set_name(property_interpreter.get_property("name"))
         if component.get_name() is None:

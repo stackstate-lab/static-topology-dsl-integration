@@ -1,6 +1,7 @@
 from typing import Dict, Optional
 
-from static_topo_impl.model.stackstate import Component, HealthCheckState, Relation
+from static_topo_impl.model.stackstate import (Component, HealthCheckState,
+                                               Relation)
 
 
 class TopologyFactory:
@@ -18,7 +19,7 @@ class TopologyFactory:
         return self.components[uid]
 
     def get_component_by_name_and_type(
-            self, component_type: str, name: str, raise_not_found: bool = True
+        self, component_type: str, name: str, raise_not_found: bool = True
     ) -> Optional[Component]:
         result = [c for c in self.components.values() if c.component_type == component_type and c.get_name() == name]
         if len(result) == 1:

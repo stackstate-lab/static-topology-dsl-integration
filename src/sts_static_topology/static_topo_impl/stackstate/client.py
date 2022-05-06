@@ -7,26 +7,12 @@ from typing import Dict, List
 from urllib.parse import quote
 
 import requests
-
-from static_topo_impl.model.stackstate import (
-    Component,
-    HealthCheckState,
-    Relation
-)
-
+from static_topo_impl.model.instance import StackStateSpec
+from static_topo_impl.model.stackstate import (Component, HealthCheckState,
+                                               Relation)
 from static_topo_impl.model.stackstate_receiver import (
-    HealthStream,
-    HealthSync,
-    HealthSyncStartSnapshot,
-    Instance,
-    ReceiverApi,
-    SyncStats,
-    TopologySync
-)
-
-from static_topo_impl.model.instance import (
-    StackStateSpec
-)
+    HealthStream, HealthSync, HealthSyncStartSnapshot, Instance, ReceiverApi,
+    SyncStats, TopologySync)
 
 
 class StackStateClient:
@@ -34,12 +20,16 @@ class StackStateClient:
         self.config = config
         self.intake_url = f"{self.config.receiver_url}/stsAgent/intake?api_key={self.config.api_key}"
 
-    def publish_health_checks(self, health_checks: List[HealthCheckState], dry_run=False, stats=SyncStats()) -> SyncStats:
+    def publish_health_checks(
+        self, health_checks: List[HealthCheckState], dry_run=False, stats=SyncStats()
+    ) -> SyncStats:
         stats.checks = len(health_checks)
         payload = self._prepare_health_sync_payload(health_checks)
         return self._post_data(payload, dry_run, stats)
 
-    def publish(self, components: List[Component], relations: List[Relation], dry_run=False, stats=SyncStats()) -> SyncStats:
+    def publish(
+        self, components: List[Component], relations: List[Relation], dry_run=False, stats=SyncStats()
+    ) -> SyncStats:
         stats.components = len(components)
         stats.relations = len(relations)
         payload = self._prepare_topo_payload(components, relations)

@@ -1,7 +1,7 @@
 from typing import List
 
 from schematics import Model
-from schematics.types import IntType, ListType, StringType, URLType, ModelType
+from schematics.types import IntType, ListType, ModelType, StringType, URLType
 
 
 # Use when running as an agent-check

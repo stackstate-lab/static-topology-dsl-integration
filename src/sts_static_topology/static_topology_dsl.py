@@ -2,8 +2,8 @@ from six import PY3
 from stackstate_checks.base import (AgentCheck, ConfigurationError,
                                     HealthStream, HealthStreamUrn,
                                     TopologyInstance)
-from static_topo_impl.model.instance import InstanceInfo
 from static_topo_impl.agent_processor import AgentProcessor
+from static_topo_impl.model.instance import InstanceInfo
 
 
 class StaticTopologyDslCheck(AgentCheck):

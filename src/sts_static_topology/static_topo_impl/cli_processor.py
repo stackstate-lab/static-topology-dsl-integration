@@ -1,10 +1,11 @@
-from static_topo_impl.dsl.interpreter import TopologyInterpreter
-from static_topo_impl.model.stackstate_receiver import SyncStats
-from static_topo_impl.stackstate import StackStateClient
-from static_topo_impl.model.instance import Configuration
-from static_topo_impl.model.factory import TopologyFactory
 import logging
 import os
+
+from static_topo_impl.dsl.interpreter import TopologyInterpreter
+from static_topo_impl.model.factory import TopologyFactory
+from static_topo_impl.model.instance import Configuration
+from static_topo_impl.model.stackstate_receiver import SyncStats
+from static_topo_impl.stackstate import StackStateClient
 
 
 class CliProcessor:
@@ -28,4 +29,4 @@ class CliProcessor:
         stats = self.stackstate.publish(
             list(self.factory.components.values()), list(self.factory.relations.values()), dry_run
         )
-        return self.stackstate.publish_health_checks( list(self.factory.health.values()), dry_run=dry_run, stats=stats)
+        return self.stackstate.publish_health_checks(list(self.factory.health.values()), dry_run=dry_run, stats=stats)
