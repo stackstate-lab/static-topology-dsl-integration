@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 from schematics import Model
-from schematics.transforms import wholelist
+from schematics.transforms import wholelist, blacklist
 from schematics.types import (BooleanType, DictType, IntType, ListType,
                               ModelType, StringType, TimestampType)
 from static_topo_impl.model.stackstate import (AnyType, Component,
@@ -34,7 +34,7 @@ class HealthSyncStartSnapshot(Model):
     repeat_interval_s: int = IntType(required=True, default=1800)  # 30 Minutes
 
     class Options:
-        roles = {"public": wholelist()}
+        roles = {"public": blacklist("expiry_interval_s")}
 
 
 class HealthStream(Model):
@@ -42,7 +42,7 @@ class HealthStream(Model):
     sub_stream_id: str = StringType()
 
     class Options:
-        roles = {"public": wholelist()}
+        roles = {"public": blacklist("sub_stream_id")}
 
 
 class HealthSync(Model):
