@@ -204,10 +204,9 @@ $ ststopo --dry-run
 ```
 <details>
 <summary>
-Expand to see output
+Click to see output
 </summary>
-
-```bash
+<pre>
 Loading configuration from ./conf.yaml
 Running Static Topology sync in dry-run mode
 2022.05.06 10:16:51 - root (27) - INFO: Processing './share/topologies/sample.topo'
@@ -345,7 +344,7 @@ Total Relations = 1.
 Total Health Syncs = 2.
 --------------------------------------------------------------------------------
 Done
-```
+</pre>
 </details>
 
 To send to StackState run `ststopo`
