@@ -52,10 +52,13 @@ Components are defined in the `components` section.  Any component property can 
 - `boolean`
 - `map` defined as `{ property: value, property: value}` where `value` can be any property type
 - `list` defined as `[value, value]` where `value` can be any property type
-- `code` is a snippet of python code.  Defined as  \``` code \```
+- `code` is a snippet of python code.  Defined as  3 backticks for opening and closing.
 
 ### Code snippets
 
+```
+Denoted by ``` python code ```
+```
 Code snippets can be used for any component property to generate the value.
 The python code is interpreted with [asteval](https://newville.github.io/asteval/).
 The code will have access to a `factory` object. This can be used to query for other components or create components
