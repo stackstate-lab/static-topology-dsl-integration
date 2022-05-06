@@ -160,7 +160,10 @@ $ mkdir -p ./share/topologies
 $ curl https://raw.githubusercontent.com/stackstate-lab/static-topology-dsl-integration/master/tests/resources/share/topologies/sample.topo -o ./share/topologies/sample.topo
 $ ststopo --dry-run   
 ```
-You will see output similar to :
+<details>
+<summary>
+Expand to see output
+</summary>
 
 ```bash
 Loading configuration from ./conf.yaml
@@ -300,8 +303,8 @@ Total Relations = 1.
 Total Health Syncs = 2.
 --------------------------------------------------------------------------------
 Done
-
 ```
+</details>
 
 To send to StackState run `ststopo`
 
