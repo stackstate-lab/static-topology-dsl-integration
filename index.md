@@ -33,16 +33,20 @@ Components are defined in the `components` section.  Any component property can 
 
 ### Component Properties
 
-| Name          | Type   | Comments                                         | 
-|---------------|--------|--------------------------------------------------|
-| id            | string | Defaults to `urn:<type>:<name>` when not defined |
-| name          | string | Required                                         |
-| layer         | string | Defaults to `unknown`                            |
-| domain        | string | Defaults to `unknown`                            |
-| labels        | list   | Optional                                         |
-| identifiers   | list   | Defaults to id when no identifiers defined       |
-| health        | string | Valid values are CRITICAL, DEVIATING, CLEAR      |
-| healthMessage | string | Optional                                         |
+| Name          | Type   | Description                                                                                          | 
+|---------------|--------|------------------------------------------------------------------------------------------------------|
+| id            | string | Optional. Defaults to `urn:<type>:<name>` when not defined                                           |
+| name          | string | Required                                                                                             |
+| layer         | string | Optional. Defaults to `unknown`                                                                      |
+| domain        | string | Optional.Defaults to `unknown`                                                                       |
+| labels        | list   | Optional.                                                                                            |
+| identifiers   | list   | Optional. Defaults to id when no identifiers defined                                                 |
+| health        | string | Optional. Defaults to CLEAR. Valid values are CRITICAL, DEVIATING, CLEAR                             |
+| healthMessage | string | Optional                                                                                             |
+| relations     | list   | Optional. `id` or `name` reference to related component. Use pipe symbol to define relation type     |
+| processor     | code   | Optional. Process `component` object using code to set other properties or querying `factory` object |
+
+These properties can also be defined in the `defaults` section for all components.
 
 ### Property types
 
