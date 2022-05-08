@@ -8,6 +8,8 @@ for cmd in pdoc3; do
         die "Missing $cmd; \`pip install $cmd\`"
 done
 
+pip install importlib_metadata==4.11.3
+
 DOCROOT="$(dirname "$(readlink -f "$0")")"
 BUILDROOT="$DOCROOT/build"
 

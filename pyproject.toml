@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sts_static_topology"
-version = "0.2.0"
+version = "0.2.1"
 description = ""
 authors = ["Ravan Naidoo <rnaidoo@stackstate.com>"]
 packages = [
