@@ -30,11 +30,12 @@
 from typing import Any, Dict, List
 
 from schematics import Model
-from schematics.transforms import wholelist, blacklist
+from schematics.transforms import blacklist, wholelist
 from schematics.types import (BooleanType, DictType, IntType, ListType,
-                              ModelType, StringType, TimestampType)
-from static_topo_impl.model.stackstate import (AnyType, Component,
-                                               HealthCheckState, Relation)
+                              ModelType, StringType)
+from static_topo_impl.model.stackstate import (AnyType, Component, Event,
+                                               HealthCheckState, Relation,
+                                               TimestampType)
 
 
 class Instance(Model):
@@ -87,7 +88,7 @@ class ReceiverApi(Model):
     apiKey: str = StringType(required=True)
     collection_timestamp: datetime = TimestampType(required=True)
     internal_hostname: str = StringType(required=True, serialized_name=&#34;internalHostname&#34;)
-    events: Dict[str, Any] = DictType(AnyType(), default={})
+    events: Dict[str, List[Event]] = DictType(ListType(ModelType(Event), default=[]), default={})
     metrics: List[Any] = ListType(AnyType(), default=[])
     service_checks: List[Any] = ListType(AnyType(), default=[])
     health: List[HealthSync] = ListType(ModelType(HealthSync), default=[])
@@ -101,6 +102,7 @@ class SyncStats(Model):
     components: int = IntType()
     relations: int = IntType()
     checks: int = IntType()
+    events: int = IntType()
     payloads: List[str] = ListType(StringType, default=[])</code></pre>
 </details>
 </section>
@@ -353,7 +355,7 @@ Complain about unrecognized keys. Default: True</p></div>
     apiKey: str = StringType(required=True)
     collection_timestamp: datetime = TimestampType(required=True)
     internal_hostname: str = StringType(required=True, serialized_name=&#34;internalHostname&#34;)
-    events: Dict[str, Any] = DictType(AnyType(), default={})
+    events: Dict[str, List[Event]] = DictType(ListType(ModelType(Event), default=[]), default={})
     metrics: List[Any] = ListType(AnyType(), default=[])
     service_checks: List[Any] = ListType(AnyType(), default=[])
     health: List[HealthSync] = ListType(ModelType(HealthSync), default=[])
@@ -382,7 +384,7 @@ Complain about unrecognized keys. Default: True</p></div>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="static_topo_impl.model.stackstate_receiver.ReceiverApi.events"><code class="name">var <span class="ident">events</span> : Dict[str, Any]</code></dt>
+<dt id="static_topo_impl.model.stackstate_receiver.ReceiverApi.events"><code class="name">var <span class="ident">events</span> : Dict[str, List[<a title="static_topo_impl.model.stackstate.Event" href="stackstate.html#static_topo_impl.model.stackstate.Event">Event</a>]]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -434,6 +436,7 @@ Complain about unrecognized keys. Default: True</p></div>
     components: int = IntType()
     relations: int = IntType()
     checks: int = IntType()
+    events: int = IntType()
     payloads: List[str] = ListType(StringType, default=[])</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -449,6 +452,10 @@ Complain about unrecognized keys. Default: True</p></div>
 <div class="desc"></div>
 </dd>
 <dt id="static_topo_impl.model.stackstate_receiver.SyncStats.components"><code class="name">var <span class="ident">components</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.model.stackstate_receiver.SyncStats.events"><code class="name">var <span class="ident">events</span> : int</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -602,6 +609,7 @@ Complain about unrecognized keys. Default: True</p></div>
 <ul class="">
 <li><code><a title="static_topo_impl.model.stackstate_receiver.SyncStats.checks" href="#static_topo_impl.model.stackstate_receiver.SyncStats.checks">checks</a></code></li>
 <li><code><a title="static_topo_impl.model.stackstate_receiver.SyncStats.components" href="#static_topo_impl.model.stackstate_receiver.SyncStats.components">components</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate_receiver.SyncStats.events" href="#static_topo_impl.model.stackstate_receiver.SyncStats.events">events</a></code></li>
 <li><code><a title="static_topo_impl.model.stackstate_receiver.SyncStats.payloads" href="#static_topo_impl.model.stackstate_receiver.SyncStats.payloads">payloads</a></code></li>
 <li><code><a title="static_topo_impl.model.stackstate_receiver.SyncStats.relations" href="#static_topo_impl.model.stackstate_receiver.SyncStats.relations">relations</a></code></li>
 </ul>

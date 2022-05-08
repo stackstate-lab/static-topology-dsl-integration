@@ -71,6 +71,7 @@ class AgentProcessor:
             self.agent_check.relation(r.source_id, r.target_id, r.get_type(), r.properties)
         self.agent_check.stop_snapshot()
         self._publish_health()
+        self._publish_events()
 
     def _publish_health(self):
         self.log.info(f&#34;Synchronizing  &#39;{len(self.factory.health)}&#39; health states&#34;)
@@ -95,7 +96,13 @@ class AgentProcessor:
                 health.message,
             )
         self.log.info(f&#34;Critical -&gt; {critical}, Deviating -&gt; {deviating}, Clear -&gt; {clear}&#34;)
-        self.agent_check.health.stop_snapshot()</code></pre>
+        self.agent_check.health.stop_snapshot()
+
+    def _publish_events(self):
+        self.log.info(f&#34;Sending  &#39;{len(self.factory.events)}&#39; events&#34;)
+        for event in self.factory.events:
+            event_dict = event.to_primitive(role=&#34;public&#34;)
+            self.agent_check.event(event_dict)</code></pre>
 </details>
 </section>
 <section>
@@ -151,6 +158,7 @@ class AgentProcessor:
             self.agent_check.relation(r.source_id, r.target_id, r.get_type(), r.properties)
         self.agent_check.stop_snapshot()
         self._publish_health()
+        self._publish_events()
 
     def _publish_health(self):
         self.log.info(f&#34;Synchronizing  &#39;{len(self.factory.health)}&#39; health states&#34;)
@@ -175,7 +183,13 @@ class AgentProcessor:
                 health.message,
             )
         self.log.info(f&#34;Critical -&gt; {critical}, Deviating -&gt; {deviating}, Clear -&gt; {clear}&#34;)
-        self.agent_check.health.stop_snapshot()</code></pre>
+        self.agent_check.health.stop_snapshot()
+
+    def _publish_events(self):
+        self.log.info(f&#34;Sending  &#39;{len(self.factory.events)}&#39; events&#34;)
+        for event in self.factory.events:
+            event_dict = event.to_primitive(role=&#34;public&#34;)
+            self.agent_check.event(event_dict)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>

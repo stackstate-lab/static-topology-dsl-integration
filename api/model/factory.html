@@ -26,10 +26,10 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from typing import Dict, Optional
+<pre><code class="python">from typing import Dict, List, Optional
 
-from static_topo_impl.model.stackstate import (Component, HealthCheckState,
-                                               Relation)
+from static_topo_impl.model.stackstate import (Component, Event,
+                                               HealthCheckState, Relation)
 
 
 class TopologyFactory:
@@ -37,6 +37,10 @@ class TopologyFactory:
         self.components: Dict[str, Component] = {}
         self.relations: Dict[str, Relation] = {}
         self.health: Dict[str, HealthCheckState] = {}
+        self.events: List[Event] = []
+
+    def add_event(self, event: Event):
+        self.events.append(event)
 
     def add_component(self, component: Component):
         if component.uid in self.components:
@@ -106,6 +110,10 @@ class TopologyFactory:
         self.components: Dict[str, Component] = {}
         self.relations: Dict[str, Relation] = {}
         self.health: Dict[str, HealthCheckState] = {}
+        self.events: List[Event] = []
+
+    def add_event(self, event: Event):
+        self.events.append(event)
 
     def add_component(self, component: Component):
         if component.uid in self.components:
@@ -166,6 +174,19 @@ class TopologyFactory:
     if component.uid in self.components:
         raise Exception(f&#34;Component &#39;{component.uid}&#39; already exists.&#34;)
     self.components[component.uid] = component</code></pre>
+</details>
+</dd>
+<dt id="static_topo_impl.model.factory.TopologyFactory.add_event"><code class="name flex">
+<span>def <span class="ident">add_event</span></span>(<span>self, event: <a title="static_topo_impl.model.stackstate.Event" href="stackstate.html#static_topo_impl.model.stackstate.Event">Event</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_event(self, event: Event):
+    self.events.append(event)</code></pre>
 </details>
 </dd>
 <dt id="static_topo_impl.model.factory.TopologyFactory.add_relation"><code class="name flex">
@@ -279,6 +300,7 @@ class TopologyFactory:
 <h4><code><a title="static_topo_impl.model.factory.TopologyFactory" href="#static_topo_impl.model.factory.TopologyFactory">TopologyFactory</a></code></h4>
 <ul class="">
 <li><code><a title="static_topo_impl.model.factory.TopologyFactory.add_component" href="#static_topo_impl.model.factory.TopologyFactory.add_component">add_component</a></code></li>
+<li><code><a title="static_topo_impl.model.factory.TopologyFactory.add_event" href="#static_topo_impl.model.factory.TopologyFactory.add_event">add_event</a></code></li>
 <li><code><a title="static_topo_impl.model.factory.TopologyFactory.add_relation" href="#static_topo_impl.model.factory.TopologyFactory.add_relation">add_relation</a></code></li>
 <li><code><a title="static_topo_impl.model.factory.TopologyFactory.component_exists" href="#static_topo_impl.model.factory.TopologyFactory.component_exists">component_exists</a></code></li>
 <li><code><a title="static_topo_impl.model.factory.TopologyFactory.get_component" href="#static_topo_impl.model.factory.TopologyFactory.get_component">get_component</a></code></li>

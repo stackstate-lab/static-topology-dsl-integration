@@ -26,14 +26,17 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from typing import Any, Dict, List
+<pre><code class="python">import re
+from datetime import datetime
+from typing import Any, Dict, List
 
 import attr
 from asteval import Interpreter
 from six import string_types
 from static_topo_impl.model.factory import TopologyFactory
-from static_topo_impl.model.stackstate import (Component, HealthCheckState,
-                                               Relation)
+from static_topo_impl.model.stackstate import (Component, Event,
+                                               HealthCheckState, Relation,
+                                               SourceLink)
 from textx import metamodel_from_str, textx_isinstance
 from textx.metamodel import TextXMetaModel
 from textx.model import TextXSyntaxError
@@ -42,7 +45,8 @@ from textx.model import TextXSyntaxError
 @attr.s(kw_only=True)
 class TopologyContext:
     factory: TopologyFactory = attr.ib()
-    component: Component = attr.ib()
+    component: Component = attr.ib(default=None)
+    event: Event = attr.ib(default=None)
 
 
 class PropertyInterpreter:
@@ -72,6 +76,14 @@ class PropertyInterpreter:
 
         return self._assert_string(value, name, self.source_name)
 
+    def get_map_property(self, name: str, default=None) -&gt; Dict[str, Any]:
+        value = self.get_property_value(name, self.properties, self.source_name, default=default)
+        return self._assert_dict(value, name, self.source_name)
+
+    def get_list_property(self, name: str, default=None) -&gt; List[Any]:
+        value = self.get_property_value(name, self.properties, self.source_name, default=default)
+        return self._assert_list(value, name, self.source_name)
+
     def get_property(self, name: str, default=None) -&gt; Any:
         value = self.get_property_value(name, self.properties, self.source_name, default=None)
         if value is None:
@@ -100,12 +112,12 @@ class PropertyInterpreter:
             list_value.extend(default_value)
             return list_value
 
-    def run_processors(self):
+    def run_processors(self, defaults_name=&#34;processor&#34;):
         name = &#34;processor&#34;
         if self._is_code(name, self.properties):
             self._run_code(self.properties[name].code, name, self.source_name)
         if self._is_code(name, self.defaults):
-            self._run_code(self.defaults[name].code, name, self.default_source)
+            self._run_code(self.defaults[defaults_name].code, defaults_name, self.default_source)
 
     def get_property_value(self, name: str, properties: Dict[str, Any], source_name: str, default: Any = None) -&gt; Any:
         value_ast = properties.get(name, default)
@@ -179,6 +191,7 @@ class PropertyInterpreter:
         aeval = Interpreter()
         aeval.symtable[&#34;factory&#34;] = ctx.factory
         aeval.symtable[&#34;component&#34;] = ctx.component
+        aeval.symtable[&#34;event&#34;] = ctx.event
         return aeval
 
     @staticmethod
@@ -202,6 +215,8 @@ class TopologyInterpreter:
     def __init__(self, factory: TopologyFactory):
         self.factory = factory
         self.topology_meta = metamodel_from_str(TOPOLOGY_TX)
+        self.ElementPropertiesChangedClass = self.topology_meta[&#34;ElementPropertiesChanged&#34;]
+        self.link_pattern = re.compile(&#34;\\[([\\s\\w-]*)\\]\\((.*)\\)&#34;)
 
     def model_from_file(self, model_file_name: str):
         try:
@@ -211,30 +226,69 @@ class TopologyInterpreter:
 
     def interpret(self, model) -&gt; TopologyFactory:
         defaults: Dict[str, Any] = {}
-        if hasattr(model, &#34;defaults&#34;):
+        if hasattr(model, &#34;defaults&#34;) and model.defaults is not None:
             defaults = self._index_properties(model.defaults.properties)
-        components_ast = model.components
-        for component_ast in components_ast.components:
-            self._interpret_component(component_ast, defaults)
-        self._resolve_relations()
+        if hasattr(model, &#34;components&#34;) and model.components is not None:
+            components_ast = model.components
+            for component_ast in components_ast.components:
+                self._interpret_component(component_ast, defaults)
+            self._resolve_relations()
+        if hasattr(model, &#34;events&#34;) and model.events is not None:
+            events_ast = model.events
+            for event_ast in events_ast.events:
+                self._interpret_event(event_ast, defaults)
+
         return self.factory
 
-    def _resolve_relations(self):
-        components: List[Component] = self.factory.components.values()
-        for source in components:
-            for relation in source.relations:
-                if self.factory.component_exists(relation.target_id):
-                    self.factory.add_relation(relation.source_id, relation.target_id, relation.get_type())
+    def _interpret_event(self, event_ast, defaults):
+        event = Event()
+        properties = self._index_properties(event_ast.properties)
+        ctx = TopologyContext(factory=self.factory, event=event)
+        property_interpreter = PropertyInterpreter(properties, defaults, &#34;event&#34;, ctx, self.topology_meta)
+
+        event.msg_title = property_interpreter.get_string_property(&#34;title&#34;, &#34;Unknown&#34;)
+        property_interpreter.source_name = f&#34;Event with title &#39;{event.msg_title}&#34;
+        event.msg_text = property_interpreter.get_string_property(&#34;message&#34;, &#34;&#34;)
+        event.tags.extend(property_interpreter.merge_list_property(&#34;tags&#34;))
+        event.timestamp = datetime.now()
+        identifiers = property_interpreter.get_list_property(&#34;identifiers&#34;, [])
+        if len(identifiers) == 0:
+            raise Exception(f&#34;Event must have at least 1 identifier &#39;{event.msg_title}&#39;.&#34;)
+        event.context.element_identifiers = self._resolve_identifiers(identifiers)
+
+        links = property_interpreter.get_list_property(&#34;links&#34;, [])
+        for link in links:
+            match = self.link_pattern.match(link)
+            if not match:
+                raise Exception(f&#34;Link &#39;{link}&#39; must have the format &#39;[description](url)&#39;&#34;)
+            source_link = SourceLink()
+            source_link.title = match.group(1)
+            source_link.url = match.group(2)
+            event.context.source_links.append(source_link)
+
+        if textx_isinstance(event_ast, self.ElementPropertiesChangedClass):
+            event.context.category = &#34;Changes&#34;
+            event.event_type = &#34;Element Properties Changed&#34;
+            previous = property_interpreter.get_map_property(&#34;previous&#34;, {})
+            current = property_interpreter.get_map_property(&#34;current&#34;, {})
+            event.context.data = {&#34;old&#34;: previous, &#34;new&#34;: current}
+
+        property_interpreter.run_processors(defaults_name=&#34;eventProcessor&#34;)
+        self.factory.add_event(event)
+
+    def _resolve_identifiers(self, identifiers):
+        resolved_identifiers = []
+        for identifier in identifiers:
+            if self.factory.component_exists(identifier):
+                resolved_identifiers.append(identifier)
+            else:
+                target_component = self.factory.get_component_by_name(identifier, raise_not_found=False)
+                if target_component:
+                    resolved_identifiers.append(target_component.uid)
                 else:
-                    target_component = self.factory.get_component_by_name(relation.target_id, raise_not_found=False)
-                    if target_component:
-                        self.factory.add_relation(relation.source_id, target_component.uid, relation.get_type())
-                    else:
-                        raise Exception(
-                            f&#34;Failed to find related component &#39;{relation.target_id}&#39;. &#34;
-                            f&#34;Reference from component {source.uid}.&#34;
-                        )
-            source.relations = []
+                    # Reference to another component on StackState Server
+                    resolved_identifiers.append(identifier)
+        return resolved_identifiers
 
     def _interpret_component(self, component_ast, defaults):
         component = Component()
@@ -258,13 +312,31 @@ class TopologyInterpreter:
         property_interpreter.run_processors()
 
         if component.uid is None:
-            raise Exception(
-                &#34;Component id is required for &#34; f&#34;&#39;{property_interpreter.source_name}({component.get_type()})&#39;.&#34;
-            )
+            component.uid = f&#34;urn:{component.get_type().lower()}:{component.get_name().lower()}&#34;
+
+        if len(component.properties.identifiers) == 0:
+            component.properties.identifiers.append(component.uid)
 
         self._interpret_health(component, property_interpreter)
         self._interpret_relations(component, property_interpreter)
         self.factory.add_component(component)
+
+    def _resolve_relations(self):
+        components: List[Component] = self.factory.components.values()
+        for source in components:
+            for relation in source.relations:
+                if self.factory.component_exists(relation.target_id):
+                    self.factory.add_relation(relation.source_id, relation.target_id, relation.get_type())
+                else:
+                    target_component = self.factory.get_component_by_name(relation.target_id, raise_not_found=False)
+                    if target_component:
+                        self.factory.add_relation(relation.source_id, target_component.uid, relation.get_type())
+                    else:
+                        raise Exception(
+                            f&#34;Failed to find related component &#39;{relation.target_id}&#39;. &#34;
+                            f&#34;Reference from component {source.uid}.&#34;
+                        )
+            source.relations = []
 
     @staticmethod
     def _interpret_relations(component: Component, property_interpreter: PropertyInterpreter):
@@ -280,6 +352,9 @@ class TopologyInterpreter:
             component.relations.append(relation)
 
     def _interpret_health(self, component: Component, property_interpreter: PropertyInterpreter):
+        cid = component.uid
+        if len(component.properties.identifiers) &gt; 0 and cid not in component.properties.identifiers:
+            cid = component.properties.identifiers[0]
         health_info = property_interpreter.get_string_property(&#34;health&#34;, &#34;HealthCheck|CLEAR&#34;)
         health_parts = health_info.split(&#34;|&#34;)
         health_name = &#34;HealthCheck&#34;
@@ -292,7 +367,7 @@ class TopologyInterpreter:
         health = HealthCheckState()
         health.check_name = health_name
         health.check_id = f&#34;{component.get_name()}_static_states&#34;
-        health.topo_identifier = component.uid
+        health.topo_identifier = cid
         health.health = health_state.upper()
         health.message = health_msg
         health.validate()
@@ -310,11 +385,12 @@ TOPOLOGY_TX = &#34;&#34;&#34;
 TopologyModel:
     defaults=Defaults?
     components=Components
+    events=Events?
 ;
 
 Defaults:
     &#39;defaults&#39; &#39;{&#39;
-        properties*=Property
+        properties*=DefaultProperty
     &#39;}&#39;
 ;
 
@@ -322,6 +398,28 @@ Components:
     &#39;components&#39; &#39;{&#39;
         components*=Component
     &#39;}&#39;
+;
+
+Events:
+    &#39;events&#39; &#39;{&#39;
+        events*=Event
+    &#39;}&#39;
+;
+
+Event:
+    ElementPropertiesChanged
+;
+
+ElementPropertiesChanged:
+    &#34;ElementPropertiesChanged&#34; &#34;(&#34; properties*=ElementPropertiesChangedProperty &#34;)&#34;
+;
+
+ElementPropertiesChangedProperty:
+  name=ElementPropertiesChangedPropertyKeyword value=PropertyValue
+;
+
+ElementPropertiesChangedPropertyKeyword:
+     EventPropertyKeyword | &#39;previous&#39; | &#39;current&#39;
 ;
 
 Component:
@@ -350,12 +448,24 @@ PropertyKeyword:
      &#39;relations&#39; | &#39;healthMessage&#39; |&#39;health&#39;
 ;
 
+DefaultProperty:
+  name=DefaultPropertyKeyword value=PropertyValue
+;
+
+DefaultPropertyKeyword:
+     PropertyKeyword | &#39;eventProcessor&#39; | &#39;tags&#39;
+;
+
+EventPropertyKeyword:
+     &#39;title&#39; | &#39;message&#39; | &#39;identifiers&#39; | &#39;tags&#39; | &#39;links&#39; | &#39;processor&#39;
+;
+
 PropertyString:
     ID | STRING
 ;
 
 PropertyValue:
-    PropertyString | FLOAT | INT |BOOL | PropertyObject | PropertyList | PropertyCode
+    PropertyString | FLOAT | INT | BOOL | PropertyObject | PropertyList | PropertyCode
 ;
 
 PropertyList:
@@ -426,6 +536,14 @@ Comment:
 
         return self._assert_string(value, name, self.source_name)
 
+    def get_map_property(self, name: str, default=None) -&gt; Dict[str, Any]:
+        value = self.get_property_value(name, self.properties, self.source_name, default=default)
+        return self._assert_dict(value, name, self.source_name)
+
+    def get_list_property(self, name: str, default=None) -&gt; List[Any]:
+        value = self.get_property_value(name, self.properties, self.source_name, default=default)
+        return self._assert_list(value, name, self.source_name)
+
     def get_property(self, name: str, default=None) -&gt; Any:
         value = self.get_property_value(name, self.properties, self.source_name, default=None)
         if value is None:
@@ -454,12 +572,12 @@ Comment:
             list_value.extend(default_value)
             return list_value
 
-    def run_processors(self):
+    def run_processors(self, defaults_name=&#34;processor&#34;):
         name = &#34;processor&#34;
         if self._is_code(name, self.properties):
             self._run_code(self.properties[name].code, name, self.source_name)
         if self._is_code(name, self.defaults):
-            self._run_code(self.defaults[name].code, name, self.default_source)
+            self._run_code(self.defaults[defaults_name].code, defaults_name, self.default_source)
 
     def get_property_value(self, name: str, properties: Dict[str, Any], source_name: str, default: Any = None) -&gt; Any:
         value_ast = properties.get(name, default)
@@ -533,6 +651,7 @@ Comment:
         aeval = Interpreter()
         aeval.symtable[&#34;factory&#34;] = ctx.factory
         aeval.symtable[&#34;component&#34;] = ctx.component
+        aeval.symtable[&#34;event&#34;] = ctx.event
         return aeval
 
     @staticmethod
@@ -553,6 +672,34 @@ Comment:
 </details>
 <h3>Methods</h3>
 <dl>
+<dt id="static_topo_impl.dsl.interpreter.PropertyInterpreter.get_list_property"><code class="name flex">
+<span>def <span class="ident">get_list_property</span></span>(<span>self, name: str, default=None) ‑> List[Any]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_list_property(self, name: str, default=None) -&gt; List[Any]:
+    value = self.get_property_value(name, self.properties, self.source_name, default=default)
+    return self._assert_list(value, name, self.source_name)</code></pre>
+</details>
+</dd>
+<dt id="static_topo_impl.dsl.interpreter.PropertyInterpreter.get_map_property"><code class="name flex">
+<span>def <span class="ident">get_map_property</span></span>(<span>self, name: str, default=None) ‑> Dict[str, Any]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_map_property(self, name: str, default=None) -&gt; Dict[str, Any]:
+    value = self.get_property_value(name, self.properties, self.source_name, default=default)
+    return self._assert_dict(value, name, self.source_name)</code></pre>
+</details>
+</dd>
 <dt id="static_topo_impl.dsl.interpreter.PropertyInterpreter.get_property"><code class="name flex">
 <span>def <span class="ident">get_property</span></span>(<span>self, name: str, default=None) ‑> Any</span>
 </code></dt>
@@ -643,7 +790,7 @@ Comment:
 </details>
 </dd>
 <dt id="static_topo_impl.dsl.interpreter.PropertyInterpreter.run_processors"><code class="name flex">
-<span>def <span class="ident">run_processors</span></span>(<span>self)</span>
+<span>def <span class="ident">run_processors</span></span>(<span>self, defaults_name='processor')</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -651,19 +798,19 @@ Comment:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run_processors(self):
+<pre><code class="python">def run_processors(self, defaults_name=&#34;processor&#34;):
     name = &#34;processor&#34;
     if self._is_code(name, self.properties):
         self._run_code(self.properties[name].code, name, self.source_name)
     if self._is_code(name, self.defaults):
-        self._run_code(self.defaults[name].code, name, self.default_source)</code></pre>
+        self._run_code(self.defaults[defaults_name].code, defaults_name, self.default_source)</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
 <dt id="static_topo_impl.dsl.interpreter.TopologyContext"><code class="flex name class">
 <span>class <span class="ident">TopologyContext</span></span>
-<span>(</span><span>*, factory: <a title="static_topo_impl.model.factory.TopologyFactory" href="../model/factory.html#static_topo_impl.model.factory.TopologyFactory">TopologyFactory</a>, component: <a title="static_topo_impl.model.stackstate.Component" href="../model/stackstate.html#static_topo_impl.model.stackstate.Component">Component</a>)</span>
+<span>(</span><span>*, factory: <a title="static_topo_impl.model.factory.TopologyFactory" href="../model/factory.html#static_topo_impl.model.factory.TopologyFactory">TopologyFactory</a>, component: <a title="static_topo_impl.model.stackstate.Component" href="../model/stackstate.html#static_topo_impl.model.stackstate.Component">Component</a> = None, event: <a title="static_topo_impl.model.stackstate.Event" href="../model/stackstate.html#static_topo_impl.model.stackstate.Event">Event</a> = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Method generated by attrs for class TopologyContext.</p></div>
@@ -673,11 +820,16 @@ Comment:
 </summary>
 <pre><code class="python">class TopologyContext:
     factory: TopologyFactory = attr.ib()
-    component: Component = attr.ib()</code></pre>
+    component: Component = attr.ib(default=None)
+    event: Event = attr.ib(default=None)</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
 <dt id="static_topo_impl.dsl.interpreter.TopologyContext.component"><code class="name">var <span class="ident">component</span> : <a title="static_topo_impl.model.stackstate.Component" href="../model/stackstate.html#static_topo_impl.model.stackstate.Component">Component</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.dsl.interpreter.TopologyContext.event"><code class="name">var <span class="ident">event</span> : <a title="static_topo_impl.model.stackstate.Event" href="../model/stackstate.html#static_topo_impl.model.stackstate.Event">Event</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -701,6 +853,8 @@ Comment:
     def __init__(self, factory: TopologyFactory):
         self.factory = factory
         self.topology_meta = metamodel_from_str(TOPOLOGY_TX)
+        self.ElementPropertiesChangedClass = self.topology_meta[&#34;ElementPropertiesChanged&#34;]
+        self.link_pattern = re.compile(&#34;\\[([\\s\\w-]*)\\]\\((.*)\\)&#34;)
 
     def model_from_file(self, model_file_name: str):
         try:
@@ -710,30 +864,69 @@ Comment:
 
     def interpret(self, model) -&gt; TopologyFactory:
         defaults: Dict[str, Any] = {}
-        if hasattr(model, &#34;defaults&#34;):
+        if hasattr(model, &#34;defaults&#34;) and model.defaults is not None:
             defaults = self._index_properties(model.defaults.properties)
-        components_ast = model.components
-        for component_ast in components_ast.components:
-            self._interpret_component(component_ast, defaults)
-        self._resolve_relations()
+        if hasattr(model, &#34;components&#34;) and model.components is not None:
+            components_ast = model.components
+            for component_ast in components_ast.components:
+                self._interpret_component(component_ast, defaults)
+            self._resolve_relations()
+        if hasattr(model, &#34;events&#34;) and model.events is not None:
+            events_ast = model.events
+            for event_ast in events_ast.events:
+                self._interpret_event(event_ast, defaults)
+
         return self.factory
 
-    def _resolve_relations(self):
-        components: List[Component] = self.factory.components.values()
-        for source in components:
-            for relation in source.relations:
-                if self.factory.component_exists(relation.target_id):
-                    self.factory.add_relation(relation.source_id, relation.target_id, relation.get_type())
+    def _interpret_event(self, event_ast, defaults):
+        event = Event()
+        properties = self._index_properties(event_ast.properties)
+        ctx = TopologyContext(factory=self.factory, event=event)
+        property_interpreter = PropertyInterpreter(properties, defaults, &#34;event&#34;, ctx, self.topology_meta)
+
+        event.msg_title = property_interpreter.get_string_property(&#34;title&#34;, &#34;Unknown&#34;)
+        property_interpreter.source_name = f&#34;Event with title &#39;{event.msg_title}&#34;
+        event.msg_text = property_interpreter.get_string_property(&#34;message&#34;, &#34;&#34;)
+        event.tags.extend(property_interpreter.merge_list_property(&#34;tags&#34;))
+        event.timestamp = datetime.now()
+        identifiers = property_interpreter.get_list_property(&#34;identifiers&#34;, [])
+        if len(identifiers) == 0:
+            raise Exception(f&#34;Event must have at least 1 identifier &#39;{event.msg_title}&#39;.&#34;)
+        event.context.element_identifiers = self._resolve_identifiers(identifiers)
+
+        links = property_interpreter.get_list_property(&#34;links&#34;, [])
+        for link in links:
+            match = self.link_pattern.match(link)
+            if not match:
+                raise Exception(f&#34;Link &#39;{link}&#39; must have the format &#39;[description](url)&#39;&#34;)
+            source_link = SourceLink()
+            source_link.title = match.group(1)
+            source_link.url = match.group(2)
+            event.context.source_links.append(source_link)
+
+        if textx_isinstance(event_ast, self.ElementPropertiesChangedClass):
+            event.context.category = &#34;Changes&#34;
+            event.event_type = &#34;Element Properties Changed&#34;
+            previous = property_interpreter.get_map_property(&#34;previous&#34;, {})
+            current = property_interpreter.get_map_property(&#34;current&#34;, {})
+            event.context.data = {&#34;old&#34;: previous, &#34;new&#34;: current}
+
+        property_interpreter.run_processors(defaults_name=&#34;eventProcessor&#34;)
+        self.factory.add_event(event)
+
+    def _resolve_identifiers(self, identifiers):
+        resolved_identifiers = []
+        for identifier in identifiers:
+            if self.factory.component_exists(identifier):
+                resolved_identifiers.append(identifier)
+            else:
+                target_component = self.factory.get_component_by_name(identifier, raise_not_found=False)
+                if target_component:
+                    resolved_identifiers.append(target_component.uid)
                 else:
-                    target_component = self.factory.get_component_by_name(relation.target_id, raise_not_found=False)
-                    if target_component:
-                        self.factory.add_relation(relation.source_id, target_component.uid, relation.get_type())
-                    else:
-                        raise Exception(
-                            f&#34;Failed to find related component &#39;{relation.target_id}&#39;. &#34;
-                            f&#34;Reference from component {source.uid}.&#34;
-                        )
-            source.relations = []
+                    # Reference to another component on StackState Server
+                    resolved_identifiers.append(identifier)
+        return resolved_identifiers
 
     def _interpret_component(self, component_ast, defaults):
         component = Component()
@@ -757,13 +950,31 @@ Comment:
         property_interpreter.run_processors()
 
         if component.uid is None:
-            raise Exception(
-                &#34;Component id is required for &#34; f&#34;&#39;{property_interpreter.source_name}({component.get_type()})&#39;.&#34;
-            )
+            component.uid = f&#34;urn:{component.get_type().lower()}:{component.get_name().lower()}&#34;
+
+        if len(component.properties.identifiers) == 0:
+            component.properties.identifiers.append(component.uid)
 
         self._interpret_health(component, property_interpreter)
         self._interpret_relations(component, property_interpreter)
         self.factory.add_component(component)
+
+    def _resolve_relations(self):
+        components: List[Component] = self.factory.components.values()
+        for source in components:
+            for relation in source.relations:
+                if self.factory.component_exists(relation.target_id):
+                    self.factory.add_relation(relation.source_id, relation.target_id, relation.get_type())
+                else:
+                    target_component = self.factory.get_component_by_name(relation.target_id, raise_not_found=False)
+                    if target_component:
+                        self.factory.add_relation(relation.source_id, target_component.uid, relation.get_type())
+                    else:
+                        raise Exception(
+                            f&#34;Failed to find related component &#39;{relation.target_id}&#39;. &#34;
+                            f&#34;Reference from component {source.uid}.&#34;
+                        )
+            source.relations = []
 
     @staticmethod
     def _interpret_relations(component: Component, property_interpreter: PropertyInterpreter):
@@ -779,6 +990,9 @@ Comment:
             component.relations.append(relation)
 
     def _interpret_health(self, component: Component, property_interpreter: PropertyInterpreter):
+        cid = component.uid
+        if len(component.properties.identifiers) &gt; 0 and cid not in component.properties.identifiers:
+            cid = component.properties.identifiers[0]
         health_info = property_interpreter.get_string_property(&#34;health&#34;, &#34;HealthCheck|CLEAR&#34;)
         health_parts = health_info.split(&#34;|&#34;)
         health_name = &#34;HealthCheck&#34;
@@ -791,7 +1005,7 @@ Comment:
         health = HealthCheckState()
         health.check_name = health_name
         health.check_id = f&#34;{component.get_name()}_static_states&#34;
-        health.topo_identifier = component.uid
+        health.topo_identifier = cid
         health.health = health_state.upper()
         health.message = health_msg
         health.validate()
@@ -817,12 +1031,18 @@ Comment:
 </summary>
 <pre><code class="python">def interpret(self, model) -&gt; TopologyFactory:
     defaults: Dict[str, Any] = {}
-    if hasattr(model, &#34;defaults&#34;):
+    if hasattr(model, &#34;defaults&#34;) and model.defaults is not None:
         defaults = self._index_properties(model.defaults.properties)
-    components_ast = model.components
-    for component_ast in components_ast.components:
-        self._interpret_component(component_ast, defaults)
-    self._resolve_relations()
+    if hasattr(model, &#34;components&#34;) and model.components is not None:
+        components_ast = model.components
+        for component_ast in components_ast.components:
+            self._interpret_component(component_ast, defaults)
+        self._resolve_relations()
+    if hasattr(model, &#34;events&#34;) and model.events is not None:
+        events_ast = model.events
+        for event_ast in events_ast.events:
+            self._interpret_event(event_ast, defaults)
+
     return self.factory</code></pre>
 </details>
 </dd>
@@ -863,6 +1083,8 @@ Comment:
 <li>
 <h4><code><a title="static_topo_impl.dsl.interpreter.PropertyInterpreter" href="#static_topo_impl.dsl.interpreter.PropertyInterpreter">PropertyInterpreter</a></code></h4>
 <ul class="two-column">
+<li><code><a title="static_topo_impl.dsl.interpreter.PropertyInterpreter.get_list_property" href="#static_topo_impl.dsl.interpreter.PropertyInterpreter.get_list_property">get_list_property</a></code></li>
+<li><code><a title="static_topo_impl.dsl.interpreter.PropertyInterpreter.get_map_property" href="#static_topo_impl.dsl.interpreter.PropertyInterpreter.get_map_property">get_map_property</a></code></li>
 <li><code><a title="static_topo_impl.dsl.interpreter.PropertyInterpreter.get_property" href="#static_topo_impl.dsl.interpreter.PropertyInterpreter.get_property">get_property</a></code></li>
 <li><code><a title="static_topo_impl.dsl.interpreter.PropertyInterpreter.get_property_value" href="#static_topo_impl.dsl.interpreter.PropertyInterpreter.get_property_value">get_property_value</a></code></li>
 <li><code><a title="static_topo_impl.dsl.interpreter.PropertyInterpreter.get_string_property" href="#static_topo_impl.dsl.interpreter.PropertyInterpreter.get_string_property">get_string_property</a></code></li>
@@ -875,6 +1097,7 @@ Comment:
 <h4><code><a title="static_topo_impl.dsl.interpreter.TopologyContext" href="#static_topo_impl.dsl.interpreter.TopologyContext">TopologyContext</a></code></h4>
 <ul class="">
 <li><code><a title="static_topo_impl.dsl.interpreter.TopologyContext.component" href="#static_topo_impl.dsl.interpreter.TopologyContext.component">component</a></code></li>
+<li><code><a title="static_topo_impl.dsl.interpreter.TopologyContext.event" href="#static_topo_impl.dsl.interpreter.TopologyContext.event">event</a></code></li>
 <li><code><a title="static_topo_impl.dsl.interpreter.TopologyContext.factory" href="#static_topo_impl.dsl.interpreter.TopologyContext.factory">factory</a></code></li>
 </ul>
 </li>

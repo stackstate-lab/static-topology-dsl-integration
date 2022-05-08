@@ -15,7 +15,7 @@ Syntax highlighting of `.topo` files can be done in VSCode, Intellij or any othe
 
 ## Topology Language
 
-The Topology language is a mix between component configuration and dynamic python snippets.
+The Topology language is a mix between component and event configuration and dynamic python snippets.
 
 
 ### Structure of `.topo` file
@@ -28,8 +28,28 @@ defaults {
 components {
    ...
 }
+
+events {
+   ...
+}
 ```
-Components are defined in the `components` section.  Any component property can also be defined in the defaults sections.
+Components and Events are defined in their relevant sections.
+
+### Default Properties
+
+| Name           | Type   | Description                                                                                          | 
+|----------------|--------|------------------------------------------------------------------------------------------------------|
+| id             | string | Optional.                                                                                            |
+| layer          | string | Optional.                                                                                            |
+| domain         | string | Optional.                                                                                            |
+| labels         | list   | Optional.                                                                                            |
+| identifiers    | list   | Optional.                                                                                            |
+| health         | string | Optional. Defaults to CLEAR. Valid values are CRITICAL, DEVIATING, CLEAR                             |
+| healthMessage  | string | Optional                                                                                             |
+| relations      | list   | Optional. `id` or `name` reference to related component. Use pipe symbol to define relation type     |
+| processor      | code   | Optional. Process `component` object using code to set other properties or querying `factory` object |
+| eventProcessor | code   | Optional. Process `event` object using code to set other properties or querying `factory` object     |
+| tags           | list   | Optional. Used for events.                                                                           |
 
 ### Component Properties
 
@@ -47,6 +67,20 @@ Components are defined in the `components` section.  Any component property can 
 | processor     | code   | Optional. Process `component` object using code to set other properties or querying `factory` object |
 
 These properties can also be defined in the `defaults` section for all components.
+
+### Event Properties
+
+| Name        | Type   | Description                                                                                      | 
+|-------------|--------|--------------------------------------------------------------------------------------------------|
+| title       | string | Optional. Defaults to `unknown`                                                                  |
+| message     | string | Optional.Defaults to ``                                                                          |
+| identifiers | list   | Required. At least 1 identifier should be defined                                                |
+| tags        | list   | Optional.                                                                                        |
+| links       | list   | Optional.  Links in the form '[description](url)'                                                |
+| processor   | code   | Optional. Process `event` object using code to set other properties or querying `factory` object |
+
+The properties can also be defined in the `defaults` section for all events.
+
 
 ### Property types
 
@@ -82,16 +116,45 @@ Easier to programmatically manipulate the component for complex processing.
 ### Comments
 
 Comments are support in the form of `#`
+
 ### Defaults Section
 
 Any list type (labels, relations, identifiers) or map type (data) properties are merged with the component in the components section.
 For all other properties, if they are defined on the component, the default is ignored.
 
-
 ### Components Section
 
 A component is defined by first entering the component type followed by opening brackets `(`.
 Define the properties and close with a closing bracket `)`
+
+### Events Section
+
+An event is defined by first entering the event type followed by opening brackets `(`.
+Define the properties and close with a closing bracket `)`
+
+#### Supported Event Types
+
+- ElementPropertyChanged
+
+| Name     | Type | Description               |
+|----------|------|---------------------------|
+| previous | map  | Optional. Previous change |
+| current  | map  | Optional. Current change  |
+
+```
+events {
+    ElementPropertiesChanged (
+        title "Host Patched"
+        message ``` "%s host was patched" % factory.get_component_by_name("test") ```
+        identifiers [ test ]
+        tags ["statictopo:event"]
+        previous { patch_version "v.1.1.0" }
+        current  { patch_version "v.1.1.2" }
+        links ["[External link](http://someurl)"]
+    )
+}
+```
+
 
 ### Sample Topology
 
@@ -112,13 +175,25 @@ defaults {
 }
 
 components {
-host (
-    name test
-    labels ["static:test"]
-    relations [ test2, "test3|hosted by"]
-)
-host(name test2, health CRITICAL)
-host(name test3)
+    host (
+        name test
+        labels ["static:test"]
+        relations [ test2, "test3|hosted by"]
+    )
+    host(name test2, health CRITICAL)
+    host(name test3)
+}
+
+events {
+    ElementPropertiesChanged (
+        title "Host Patched"
+        message ``` "%s host was patched" % factory.get_component_by_name("test") ```
+        identifiers [ test ]
+        tags ["statictopo:event"]
+        previous { patch_version "v.1.1.0" }
+        current  { patch_version "v.1.1.2" }
+        links ["[External link](http://someurl)"]
+    )
 }
 ```
 
@@ -156,7 +231,7 @@ $ pip install six requests
 
 
 ```bash
-python -m pip install https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/0.1.0/sts_static_topology-0.1.0-py2.py3-none-any.whl
+python -m pip install https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/0.2.0/sts_static_topology-0.2.0-py2.py3-none-any.whl
 ```
 
 The `ststopo` command-line utility reads `.topo` files specified in the `conf.yaml` and sends the resulting Components, Relations and Health to StackState.
@@ -347,12 +422,12 @@ To send to StackState run `ststopo`
 
 ### Agent Check
 
-Download Static Topology DSL agent check [release](https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/v0.1.0/sts_static_topology-0.1.0.zip)
+Download Static Topology DSL agent check [release](https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/v0.2.0/sts_static_topology-0.2.0.zip)
 to the machine running the StackState Agent.
 
 ```bash
-$ curl -o sts_static_topology-0.1.0.zip -L https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/0.1.0/sts_static_topology-0.1.0.zip
-$ unzip ./sts_static_topology-0.1.0.zip
+$ curl -o sts_static_topology-0.2.0.zip -L https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/0.2.0/sts_static_topology-0.2.0.zip
+$ unzip ./sts_static_topology-0.2.0.zip
 $ ./install.sh
 $ cd /etc/stackstate-agent/conf.d/static_topology_dsl.d
 $ cp ./conf.yaml.example ./conf.yaml

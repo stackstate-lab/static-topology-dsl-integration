@@ -26,17 +26,27 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from typing import Any, Dict, List
+<pre><code class="python">from datetime import datetime
+from typing import Any, Dict, List
 
+import pytz
 from schematics import Model
 from schematics.transforms import blacklist, wholelist
 from schematics.types import (BaseType, DictType, ListType, ModelType,
                               StringType)
+from schematics.types import TimestampType as DefaultTimestampType
+from schematics.types import URLType
 
 
 class AnyType(BaseType):
     def __init__(self, **kwargs):
         super(AnyType, self).__init__(**kwargs)
+
+
+class TimestampType(DefaultTimestampType):
+    def to_primitive(self, value, context=None):
+        value.astimezone(pytz.UTC)
+        return int(round(value.timestamp()))  # seconds
 
 
 class ComponentType(Model):
@@ -138,6 +148,39 @@ class HealthCheckState(Model):
     topo_identifier: str = StringType(required=True, serialized_name=&#34;topologyElementIdentifier&#34;)
     message: str = StringType(required=False)
     health: str = StringType(required=True, choices=[&#34;CLEAR&#34;, &#34;DEVIATING&#34;, &#34;CRITICAL&#34;])
+
+    class Options:
+        roles = {&#34;public&#34;: wholelist()}
+
+
+class SourceLink(Model):
+    title = StringType(required=True)
+    url = URLType(fqdn=False, required=True)
+
+    class Options:
+        roles = {&#34;public&#34;: wholelist()}
+
+
+class EventContext(Model):
+    category: str = StringType(required=True, choices=[&#34;Activities&#34;, &#34;Alerts&#34;, &#34;Anomalies&#34;, &#34;Changes&#34;, &#34;Others&#34;])
+    data: Dict[str, Any] = DictType(AnyType, default={})
+    element_identifiers: List[str] = ListType(StringType, required=False, default=[])
+    source: str = StringType(required=True, default=&#34;StaticTopology&#34;)
+    source_links: List[SourceLink] = ListType(ModelType(SourceLink), required=False, default=[])
+
+    class Options:
+        roles = {&#34;public&#34;: wholelist()}
+        serialize_when_none = False
+
+
+class Event(Model):
+    context: EventContext = ModelType(EventContext, required=True, default=EventContext())
+    event_type: str = StringType(required=True)
+    msg_title: str = StringType(required=True)
+    msg_text: str = StringType(required=True)
+    source_type_name: str = StringType(required=True, default=&#34;StaticTopology&#34;)
+    tags: List[str] = ListType(StringType, required=False, default=[])
+    timestamp: datetime = TimestampType(required=True)
 
     class Options:
         roles = {&#34;public&#34;: wholelist()}</code></pre>
@@ -597,6 +640,149 @@ Complain about unrecognized keys. Default: True</p></div>
 </dd>
 </dl>
 </dd>
+<dt id="static_topo_impl.model.stackstate.Event"><code class="flex name class">
+<span>class <span class="ident">Event</span></span>
+<span>(</span><span>raw_data=None, trusted_data=None, deserialize_mapping=None, init=True, partial=True, strict=True, validate=False, app_data=None, lazy=False, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Enclosure for fields and validation. Same pattern deployed by Django
+models, SQLAlchemy declarative extension and other developer friendly
+libraries.</p>
+<p>:param Mapping raw_data:
+The data to be imported into the model instance.
+:param Mapping deserialize_mapping:
+Can be used to provide alternative input names for fields. Values may be
+strings or lists of strings, keyed by the actual field name.
+:param bool partial:
+Allow partial data to validate. Essentially drops the <code>required=True</code>
+settings from field definitions. Default: True
+:param bool strict:
+Complain about unrecognized keys. Default: True</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Event(Model):
+    context: EventContext = ModelType(EventContext, required=True, default=EventContext())
+    event_type: str = StringType(required=True)
+    msg_title: str = StringType(required=True)
+    msg_text: str = StringType(required=True)
+    source_type_name: str = StringType(required=True, default=&#34;StaticTopology&#34;)
+    tags: List[str] = ListType(StringType, required=False, default=[])
+    timestamp: datetime = TimestampType(required=True)
+
+    class Options:
+        roles = {&#34;public&#34;: wholelist()}</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>schematics.deprecated.patch_models.<locals>.Model</li>
+<li>schematics.deprecated.ModelCompatibilityMixin</li>
+<li>schematics.models.Model</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="static_topo_impl.model.stackstate.Event.Options"><code class="name">var <span class="ident">Options</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.model.stackstate.Event.context"><code class="name">var <span class="ident">context</span> : <a title="static_topo_impl.model.stackstate.EventContext" href="#static_topo_impl.model.stackstate.EventContext">EventContext</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.model.stackstate.Event.event_type"><code class="name">var <span class="ident">event_type</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.model.stackstate.Event.msg_text"><code class="name">var <span class="ident">msg_text</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.model.stackstate.Event.msg_title"><code class="name">var <span class="ident">msg_title</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.model.stackstate.Event.source_type_name"><code class="name">var <span class="ident">source_type_name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.model.stackstate.Event.tags"><code class="name">var <span class="ident">tags</span> : List[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.model.stackstate.Event.timestamp"><code class="name">var <span class="ident">timestamp</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="static_topo_impl.model.stackstate.EventContext"><code class="flex name class">
+<span>class <span class="ident">EventContext</span></span>
+<span>(</span><span>raw_data=None, trusted_data=None, deserialize_mapping=None, init=True, partial=True, strict=True, validate=False, app_data=None, lazy=False, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Enclosure for fields and validation. Same pattern deployed by Django
+models, SQLAlchemy declarative extension and other developer friendly
+libraries.</p>
+<p>:param Mapping raw_data:
+The data to be imported into the model instance.
+:param Mapping deserialize_mapping:
+Can be used to provide alternative input names for fields. Values may be
+strings or lists of strings, keyed by the actual field name.
+:param bool partial:
+Allow partial data to validate. Essentially drops the <code>required=True</code>
+settings from field definitions. Default: True
+:param bool strict:
+Complain about unrecognized keys. Default: True</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EventContext(Model):
+    category: str = StringType(required=True, choices=[&#34;Activities&#34;, &#34;Alerts&#34;, &#34;Anomalies&#34;, &#34;Changes&#34;, &#34;Others&#34;])
+    data: Dict[str, Any] = DictType(AnyType, default={})
+    element_identifiers: List[str] = ListType(StringType, required=False, default=[])
+    source: str = StringType(required=True, default=&#34;StaticTopology&#34;)
+    source_links: List[SourceLink] = ListType(ModelType(SourceLink), required=False, default=[])
+
+    class Options:
+        roles = {&#34;public&#34;: wholelist()}
+        serialize_when_none = False</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>schematics.deprecated.patch_models.<locals>.Model</li>
+<li>schematics.deprecated.ModelCompatibilityMixin</li>
+<li>schematics.models.Model</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="static_topo_impl.model.stackstate.EventContext.Options"><code class="name">var <span class="ident">Options</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.model.stackstate.EventContext.category"><code class="name">var <span class="ident">category</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.model.stackstate.EventContext.data"><code class="name">var <span class="ident">data</span> : Dict[str, Any]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.model.stackstate.EventContext.element_identifiers"><code class="name">var <span class="ident">element_identifiers</span> : List[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.model.stackstate.EventContext.source"><code class="name">var <span class="ident">source</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.model.stackstate.EventContext.source_links"><code class="name">var <span class="ident">source_links</span> : List[<a title="static_topo_impl.model.stackstate.SourceLink" href="#static_topo_impl.model.stackstate.SourceLink">SourceLink</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
 <dt id="static_topo_impl.model.stackstate.HealthCheckState"><code class="flex name class">
 <span>class <span class="ident">HealthCheckState</span></span>
 <span>(</span><span>raw_data=None, trusted_data=None, deserialize_mapping=None, init=True, partial=True, strict=True, validate=False, app_data=None, lazy=False, **kwargs)</span>
@@ -776,6 +962,105 @@ Complain about unrecognized keys. Default: True</p></div>
 </dd>
 </dl>
 </dd>
+<dt id="static_topo_impl.model.stackstate.SourceLink"><code class="flex name class">
+<span>class <span class="ident">SourceLink</span></span>
+<span>(</span><span>raw_data=None, trusted_data=None, deserialize_mapping=None, init=True, partial=True, strict=True, validate=False, app_data=None, lazy=False, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Enclosure for fields and validation. Same pattern deployed by Django
+models, SQLAlchemy declarative extension and other developer friendly
+libraries.</p>
+<p>:param Mapping raw_data:
+The data to be imported into the model instance.
+:param Mapping deserialize_mapping:
+Can be used to provide alternative input names for fields. Values may be
+strings or lists of strings, keyed by the actual field name.
+:param bool partial:
+Allow partial data to validate. Essentially drops the <code>required=True</code>
+settings from field definitions. Default: True
+:param bool strict:
+Complain about unrecognized keys. Default: True</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SourceLink(Model):
+    title = StringType(required=True)
+    url = URLType(fqdn=False, required=True)
+
+    class Options:
+        roles = {&#34;public&#34;: wholelist()}</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>schematics.deprecated.patch_models.<locals>.Model</li>
+<li>schematics.deprecated.ModelCompatibilityMixin</li>
+<li>schematics.models.Model</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="static_topo_impl.model.stackstate.SourceLink.Options"><code class="name">var <span class="ident">Options</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.model.stackstate.SourceLink.title"><code class="name">var <span class="ident">title</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="static_topo_impl.model.stackstate.SourceLink.url"><code class="name">var <span class="ident">url</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="static_topo_impl.model.stackstate.TimestampType"><code class="flex name class">
+<span>class <span class="ident">TimestampType</span></span>
+<span>(</span><span>formats=None, parser=None, drop_tzinfo=False, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A variant of <code>DateTimeType</code> that exports itself as a Unix timestamp
+instead of an ISO 8601 string. Always sets <code>tzd='require'</code> and
+<code>convert_tz=True</code>.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TimestampType(DefaultTimestampType):
+    def to_primitive(self, value, context=None):
+        value.astimezone(pytz.UTC)
+        return int(round(value.timestamp()))  # seconds</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>schematics.types.base.TimestampType</li>
+<li>schematics.types.base.DateTimeType</li>
+<li>schematics.types.base.BaseType</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="static_topo_impl.model.stackstate.TimestampType.MESSAGES"><code class="name">var <span class="ident">MESSAGES</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="static_topo_impl.model.stackstate.TimestampType.to_primitive"><code class="name flex">
+<span>def <span class="ident">to_primitive</span></span>(<span>self, value, context=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert internal data to a value safe to serialize.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_primitive(self, value, context=None):
+    value.astimezone(pytz.UTC)
+    return int(round(value.timestamp()))  # seconds</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 </dl>
 </section>
 </article>
@@ -840,6 +1125,30 @@ Complain about unrecognized keys. Default: True</p></div>
 </ul>
 </li>
 <li>
+<h4><code><a title="static_topo_impl.model.stackstate.Event" href="#static_topo_impl.model.stackstate.Event">Event</a></code></h4>
+<ul class="two-column">
+<li><code><a title="static_topo_impl.model.stackstate.Event.Options" href="#static_topo_impl.model.stackstate.Event.Options">Options</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate.Event.context" href="#static_topo_impl.model.stackstate.Event.context">context</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate.Event.event_type" href="#static_topo_impl.model.stackstate.Event.event_type">event_type</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate.Event.msg_text" href="#static_topo_impl.model.stackstate.Event.msg_text">msg_text</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate.Event.msg_title" href="#static_topo_impl.model.stackstate.Event.msg_title">msg_title</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate.Event.source_type_name" href="#static_topo_impl.model.stackstate.Event.source_type_name">source_type_name</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate.Event.tags" href="#static_topo_impl.model.stackstate.Event.tags">tags</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate.Event.timestamp" href="#static_topo_impl.model.stackstate.Event.timestamp">timestamp</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="static_topo_impl.model.stackstate.EventContext" href="#static_topo_impl.model.stackstate.EventContext">EventContext</a></code></h4>
+<ul class="two-column">
+<li><code><a title="static_topo_impl.model.stackstate.EventContext.Options" href="#static_topo_impl.model.stackstate.EventContext.Options">Options</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate.EventContext.category" href="#static_topo_impl.model.stackstate.EventContext.category">category</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate.EventContext.data" href="#static_topo_impl.model.stackstate.EventContext.data">data</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate.EventContext.element_identifiers" href="#static_topo_impl.model.stackstate.EventContext.element_identifiers">element_identifiers</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate.EventContext.source" href="#static_topo_impl.model.stackstate.EventContext.source">source</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate.EventContext.source_links" href="#static_topo_impl.model.stackstate.EventContext.source_links">source_links</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="static_topo_impl.model.stackstate.HealthCheckState" href="#static_topo_impl.model.stackstate.HealthCheckState">HealthCheckState</a></code></h4>
 <ul class="two-column">
 <li><code><a title="static_topo_impl.model.stackstate.HealthCheckState.Options" href="#static_topo_impl.model.stackstate.HealthCheckState.Options">Options</a></code></li>
@@ -861,6 +1170,21 @@ Complain about unrecognized keys. Default: True</p></div>
 <li><code><a title="static_topo_impl.model.stackstate.Relation.set_type" href="#static_topo_impl.model.stackstate.Relation.set_type">set_type</a></code></li>
 <li><code><a title="static_topo_impl.model.stackstate.Relation.source_id" href="#static_topo_impl.model.stackstate.Relation.source_id">source_id</a></code></li>
 <li><code><a title="static_topo_impl.model.stackstate.Relation.target_id" href="#static_topo_impl.model.stackstate.Relation.target_id">target_id</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="static_topo_impl.model.stackstate.SourceLink" href="#static_topo_impl.model.stackstate.SourceLink">SourceLink</a></code></h4>
+<ul class="">
+<li><code><a title="static_topo_impl.model.stackstate.SourceLink.Options" href="#static_topo_impl.model.stackstate.SourceLink.Options">Options</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate.SourceLink.title" href="#static_topo_impl.model.stackstate.SourceLink.title">title</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate.SourceLink.url" href="#static_topo_impl.model.stackstate.SourceLink.url">url</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="static_topo_impl.model.stackstate.TimestampType" href="#static_topo_impl.model.stackstate.TimestampType">TimestampType</a></code></h4>
+<ul class="">
+<li><code><a title="static_topo_impl.model.stackstate.TimestampType.MESSAGES" href="#static_topo_impl.model.stackstate.TimestampType.MESSAGES">MESSAGES</a></code></li>
+<li><code><a title="static_topo_impl.model.stackstate.TimestampType.to_primitive" href="#static_topo_impl.model.stackstate.TimestampType.to_primitive">to_primitive</a></code></li>
 </ul>
 </li>
 </ul>
