@@ -68,7 +68,7 @@ DefaultProperty:
 ;
 
 DefaultPropertyKeyword:
-     PropertyKeyword | 'eventProcessor' | 'tags'
+     PropertyKeyword | 'eventProcessor' | 'tags' | 'title' | 'message' | 'links'
 ;
 
 EventPropertyKeyword:
