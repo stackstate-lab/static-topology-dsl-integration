@@ -46,6 +46,7 @@ def cli(conf: str, log_level: str, dry_run: bool, work_dir: str):
     click.echo("-" * 80)
     click.echo(f"Total Components = {result.components}.")
     click.echo(f"Total Relations = {result.relations}.")
+    click.echo(f"Total Events = {result.events}.")
     click.echo(f"Total Health Syncs = {result.checks}.")
     click.echo("-" * 80)
     click.echo("Done")

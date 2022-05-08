@@ -1,11 +1,12 @@
 TopologyModel:
     defaults=Defaults?
-    components=Components
+    components=Components?
+    events=Events?
 ;
 
 Defaults:
     'defaults' '{'
-        properties*=Property
+        properties*=DefaultProperty
     '}'
 ;
 
@@ -13,6 +14,28 @@ Components:
     'components' '{'
         components*=Component
     '}'
+;
+
+Events:
+    'events' '{'
+        events*=Event
+    '}'
+;
+
+Event:
+    ElementPropertiesChanged
+;
+
+ElementPropertiesChanged:
+    "ElementPropertiesChanged" "(" properties*=ElementPropertiesChangedProperty ")"
+;
+
+ElementPropertiesChangedProperty:
+  name=ElementPropertiesChangedPropertyKeyword value=PropertyValue
+;
+
+ElementPropertiesChangedPropertyKeyword:
+     EventPropertyKeyword | 'previous' | 'current'
 ;
 
 Component:
@@ -38,6 +61,18 @@ Property:
 PropertyKeyword:
      'identifiers' | 'id' | 'name' | 'layer' | 'domain' | 'environment' | 'labels' | 'processor' | 'data' |
      'relations' | 'healthMessage' |'health'
+;
+
+DefaultProperty:
+  name=DefaultPropertyKeyword value=PropertyValue
+;
+
+DefaultPropertyKeyword:
+     PropertyKeyword | 'eventProcessor' | 'tags'
+;
+
+EventPropertyKeyword:
+     'title' | 'message' | 'identifiers' | 'tags' | 'links' | 'processor'
 ;
 
 PropertyString:

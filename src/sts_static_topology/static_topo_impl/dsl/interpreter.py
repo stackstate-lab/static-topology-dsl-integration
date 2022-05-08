@@ -1,11 +1,14 @@
+import re
+from datetime import datetime
 from typing import Any, Dict, List
 
 import attr
 from asteval import Interpreter
 from six import string_types
 from static_topo_impl.model.factory import TopologyFactory
-from static_topo_impl.model.stackstate import (Component, HealthCheckState,
-                                               Relation)
+from static_topo_impl.model.stackstate import (Component, Event,
+                                               HealthCheckState, Relation,
+                                               SourceLink)
 from textx import metamodel_from_str, textx_isinstance
 from textx.metamodel import TextXMetaModel
 from textx.model import TextXSyntaxError
@@ -14,7 +17,8 @@ from textx.model import TextXSyntaxError
 @attr.s(kw_only=True)
 class TopologyContext:
     factory: TopologyFactory = attr.ib()
-    component: Component = attr.ib()
+    component: Component = attr.ib(default=None)
+    event: Event = attr.ib(default=None)
 
 
 class PropertyInterpreter:
@@ -44,6 +48,14 @@ class PropertyInterpreter:
 
         return self._assert_string(value, name, self.source_name)
 
+    def get_map_property(self, name: str, default=None) -> Dict[str, Any]:
+        value = self.get_property_value(name, self.properties, self.source_name, default=default)
+        return self._assert_dict(value, name, self.source_name)
+
+    def get_list_property(self, name: str, default=None) -> List[Any]:
+        value = self.get_property_value(name, self.properties, self.source_name, default=default)
+        return self._assert_list(value, name, self.source_name)
+
     def get_property(self, name: str, default=None) -> Any:
         value = self.get_property_value(name, self.properties, self.source_name, default=None)
         if value is None:
@@ -72,12 +84,12 @@ class PropertyInterpreter:
             list_value.extend(default_value)
             return list_value
 
-    def run_processors(self):
+    def run_processors(self, defaults_name="processor"):
         name = "processor"
         if self._is_code(name, self.properties):
             self._run_code(self.properties[name].code, name, self.source_name)
         if self._is_code(name, self.defaults):
-            self._run_code(self.defaults[name].code, name, self.default_source)
+            self._run_code(self.defaults[defaults_name].code, defaults_name, self.default_source)
 
     def get_property_value(self, name: str, properties: Dict[str, Any], source_name: str, default: Any = None) -> Any:
         value_ast = properties.get(name, default)
@@ -151,6 +163,7 @@ class PropertyInterpreter:
         aeval = Interpreter()
         aeval.symtable["factory"] = ctx.factory
         aeval.symtable["component"] = ctx.component
+        aeval.symtable["event"] = ctx.event
         return aeval
 
     @staticmethod
@@ -174,6 +187,8 @@ class TopologyInterpreter:
     def __init__(self, factory: TopologyFactory):
         self.factory = factory
         self.topology_meta = metamodel_from_str(TOPOLOGY_TX)
+        self.ElementPropertiesChangedClass = self.topology_meta["ElementPropertiesChanged"]
+        self.link_pattern = re.compile("\\[([\\s\\w-]*)\\]\\((.*)\\)")
 
     def model_from_file(self, model_file_name: str):
         try:
@@ -183,30 +198,69 @@ class TopologyInterpreter:
 
     def interpret(self, model) -> TopologyFactory:
         defaults: Dict[str, Any] = {}
-        if model.defaults is not None:
+        if hasattr(model, "defaults") and model.defaults is not None:
             defaults = self._index_properties(model.defaults.properties)
-        components_ast = model.components
-        for component_ast in components_ast.components:
-            self._interpret_component(component_ast, defaults)
-        self._resolve_relations()
+        if hasattr(model, "components") and model.components is not None:
+            components_ast = model.components
+            for component_ast in components_ast.components:
+                self._interpret_component(component_ast, defaults)
+            self._resolve_relations()
+        if hasattr(model, "events") and model.events is not None:
+            events_ast = model.events
+            for event_ast in events_ast.events:
+                self._interpret_event(event_ast, defaults)
+
         return self.factory
 
-    def _resolve_relations(self):
-        components: List[Component] = self.factory.components.values()
-        for source in components:
-            for relation in source.relations:
-                if self.factory.component_exists(relation.target_id):
-                    self.factory.add_relation(relation.source_id, relation.target_id, relation.get_type())
+    def _interpret_event(self, event_ast, defaults):
+        event = Event()
+        properties = self._index_properties(event_ast.properties)
+        ctx = TopologyContext(factory=self.factory, event=event)
+        property_interpreter = PropertyInterpreter(properties, defaults, "event", ctx, self.topology_meta)
+
+        event.msg_title = property_interpreter.get_string_property("title", "Unknown")
+        property_interpreter.source_name = f"Event with title '{event.msg_title}"
+        event.msg_text = property_interpreter.get_string_property("message", "")
+        event.tags.extend(property_interpreter.merge_list_property("tags"))
+        event.timestamp = datetime.now()
+        identifiers = property_interpreter.get_list_property("identifiers", [])
+        if len(identifiers) == 0:
+            raise Exception(f"Event must have at least 1 identifier '{event.msg_title}'.")
+        event.context.element_identifiers = self._resolve_identifiers(identifiers)
+
+        links = property_interpreter.get_list_property("links", [])
+        for link in links:
+            match = self.link_pattern.match(link)
+            if not match:
+                raise Exception(f"Link '{link}' must have the format '[description](url)'")
+            source_link = SourceLink()
+            source_link.title = match.group(1)
+            source_link.url = match.group(2)
+            event.context.source_links.append(source_link)
+
+        if textx_isinstance(event_ast, self.ElementPropertiesChangedClass):
+            event.context.category = "Changes"
+            event.event_type = "Element Properties Changed"
+            previous = property_interpreter.get_map_property("previous", {})
+            current = property_interpreter.get_map_property("current", {})
+            event.context.data = {"old": previous, "new": current}
+
+        property_interpreter.run_processors(defaults_name="eventProcessor")
+        self.factory.add_event(event)
+
+    def _resolve_identifiers(self, identifiers):
+        resolved_identifiers = []
+        for identifier in identifiers:
+            if self.factory.component_exists(identifier):
+                resolved_identifiers.append(identifier)
+            else:
+                target_component = self.factory.get_component_by_name(identifier, raise_not_found=False)
+                if target_component:
+                    resolved_identifiers.append(target_component.uid)
                 else:
-                    target_component = self.factory.get_component_by_name(relation.target_id, raise_not_found=False)
-                    if target_component:
-                        self.factory.add_relation(relation.source_id, target_component.uid, relation.get_type())
-                    else:
-                        raise Exception(
-                            f"Failed to find related component '{relation.target_id}'. "
-                            f"Reference from component {source.uid}."
-                        )
-            source.relations = []
+                    # Reference to another component on StackState Server
+                    resolved_identifiers.append(identifier)
+        return resolved_identifiers
 
     def _interpret_component(self, component_ast, defaults):
         component = Component()
@@ -238,6 +292,23 @@ class TopologyInterpreter:
         self._interpret_health(component, property_interpreter)
         self._interpret_relations(component, property_interpreter)
         self.factory.add_component(component)
+
+    def _resolve_relations(self):
+        components: List[Component] = self.factory.components.values()
+        for source in components:
+            for relation in source.relations:
+                if self.factory.component_exists(relation.target_id):
+                    self.factory.add_relation(relation.source_id, relation.target_id, relation.get_type())
+                else:
+                    target_component = self.factory.get_component_by_name(relation.target_id, raise_not_found=False)
+                    if target_component:
+                        self.factory.add_relation(relation.source_id, target_component.uid, relation.get_type())
+                    else:
+                        raise Exception(
+                            f"Failed to find related component '{relation.target_id}'. "
+                            f"Reference from component {source.uid}."
+                        )
+            source.relations = []
 
     @staticmethod
     def _interpret_relations(component: Component, property_interpreter: PropertyInterpreter):
@@ -286,11 +357,12 @@ TOPOLOGY_TX = """
 TopologyModel:
     defaults=Defaults?
     components=Components
+    events=Events?
 ;
 
 Defaults:
     'defaults' '{'
-        properties*=Property
+        properties*=DefaultProperty
     '}'
 ;
 
@@ -298,6 +370,28 @@ Components:
     'components' '{'
         components*=Component
     '}'
+;
+
+Events:
+    'events' '{'
+        events*=Event
+    '}'
+;
+
+Event:
+    ElementPropertiesChanged
+;
+
+ElementPropertiesChanged:
+    "ElementPropertiesChanged" "(" properties*=ElementPropertiesChangedProperty ")"
+;
+
+ElementPropertiesChangedProperty:
+  name=ElementPropertiesChangedPropertyKeyword value=PropertyValue
+;
+
+ElementPropertiesChangedPropertyKeyword:
+     EventPropertyKeyword | 'previous' | 'current'
 ;
 
 Component:
@@ -326,12 +420,24 @@ PropertyKeyword:
      'relations' | 'healthMessage' |'health'
 ;
 
+DefaultProperty:
+  name=DefaultPropertyKeyword value=PropertyValue
+;
+
+DefaultPropertyKeyword:
+     PropertyKeyword | 'eventProcessor' | 'tags'
+;
+
+EventPropertyKeyword:
+     'title' | 'message' | 'identifiers' | 'tags' | 'links' | 'processor'
+;
+
 PropertyString:
     ID | STRING
 ;
 
 PropertyValue:
-    PropertyString | FLOAT | INT |BOOL | PropertyObject | PropertyList | PropertyCode
+    PropertyString | FLOAT | INT | BOOL | PropertyObject | PropertyList | PropertyCode
 ;
 
 PropertyList:

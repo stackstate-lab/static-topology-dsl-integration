@@ -17,11 +17,41 @@ defaults {
 
 components {
   host (
-
     name test
     labels ["static:test"]
     relations [ test2, "test3|hosted by"]
   )
-  host(name test2, health CRITICAL)
+  host(name test2, health CLEAR)
   host(name test3)
+}
+
+
+events {
+    ElementPropertiesChanged (
+        title "Host Patched"
+        message ``` "%s host was patched" % (factory.get_component_by_name("test").uid) ```
+        identifiers [ test ]
+        tags ["statictopo:event"]
+        previous {
+            patch_version "v.1.1.5"
+        }
+        current  {
+            patch_version "v.1.1.6"
+        }
+        links ["[External link](http://someurl)"]
+    )
+
+    ElementPropertiesChanged (
+            title "Host Patched"
+            message ``` "%s host was patched" % (factory.get_component_by_name("test").uid) ```
+            identifiers [ test2 ]
+            tags ["statictopo:event"]
+            previous {
+                patch_version "v.1.1.0"
+            }
+            current  {
+                patch_version "v.1.1.2"
+            }
+            links ["[External link](http://someurl)"]
+        )
 }

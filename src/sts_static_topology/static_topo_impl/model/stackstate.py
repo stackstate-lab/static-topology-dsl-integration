@@ -1,14 +1,24 @@
+from datetime import datetime
 from typing import Any, Dict, List
 
+import pytz
 from schematics import Model
 from schematics.transforms import blacklist, wholelist
 from schematics.types import (BaseType, DictType, ListType, ModelType,
                               StringType)
+from schematics.types import TimestampType as DefaultTimestampType
+from schematics.types import URLType
 
 
 class AnyType(BaseType):
     def __init__(self, **kwargs):
         super(AnyType, self).__init__(**kwargs)
+
+
+class TimestampType(DefaultTimestampType):
+    def to_primitive(self, value, context=None):
+        value.astimezone(pytz.UTC)
+        return int(round(value.timestamp()))  # seconds
 
 
 class ComponentType(Model):
@@ -110,6 +120,39 @@ class HealthCheckState(Model):
     topo_identifier: str = StringType(required=True, serialized_name="topologyElementIdentifier")
     message: str = StringType(required=False)
     health: str = StringType(required=True, choices=["CLEAR", "DEVIATING", "CRITICAL"])
+
+    class Options:
+        roles = {"public": wholelist()}
+
+
+class SourceLink(Model):
+    title = StringType(required=True)
+    url = URLType(fqdn=False, required=True)
+
+    class Options:
+        roles = {"public": wholelist()}
+
+
+class EventContext(Model):
+    category: str = StringType(required=True, choices=["Activities", "Alerts", "Anomalies", "Changes", "Others"])
+    data: Dict[str, Any] = DictType(AnyType, default={})
+    element_identifiers: List[str] = ListType(StringType, required=False, default=[])
+    source: str = StringType(required=True, default="StaticTopology")
+    source_links: List[SourceLink] = ListType(ModelType(SourceLink), required=False, default=[])
+
+    class Options:
+        roles = {"public": wholelist()}
+        serialize_when_none = False
+
+
+class Event(Model):
+    context: EventContext = ModelType(EventContext, required=True, default=EventContext())
+    event_type: str = StringType(required=True)
+    msg_title: str = StringType(required=True)
+    msg_text: str = StringType(required=True)
+    source_type_name: str = StringType(required=True, default="StaticTopology")
+    tags: List[str] = ListType(StringType, required=False, default=[])
+    timestamp: datetime = TimestampType(required=True)
 
     class Options:
         roles = {"public": wholelist()}

@@ -1,7 +1,7 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
-from static_topo_impl.model.stackstate import (Component, HealthCheckState,
-                                               Relation)
+from static_topo_impl.model.stackstate import (Component, Event,
+                                               HealthCheckState, Relation)
 
 
 class TopologyFactory:
@@ -9,6 +9,10 @@ class TopologyFactory:
         self.components: Dict[str, Component] = {}
         self.relations: Dict[str, Relation] = {}
         self.health: Dict[str, HealthCheckState] = {}
+        self.events: List[Event] = []
+
+    def add_event(self, event: Event):
+        self.events.append(event)
 
     def add_component(self, component: Component):
         if component.uid in self.components:

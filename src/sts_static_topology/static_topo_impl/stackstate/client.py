@@ -8,8 +8,8 @@ from urllib.parse import quote
 
 import requests
 from static_topo_impl.model.instance import StackStateSpec
-from static_topo_impl.model.stackstate import (Component, HealthCheckState,
-                                               Relation)
+from static_topo_impl.model.stackstate import (Component, Event,
+                                               HealthCheckState, Relation)
 from static_topo_impl.model.stackstate_receiver import (
     HealthStream, HealthSync, HealthSyncStartSnapshot, Instance, ReceiverApi,
     SyncStats, TopologySync)
@@ -25,6 +25,11 @@ class StackStateClient:
     ) -> SyncStats:
         stats.checks = len(health_checks)
         payload = self._prepare_health_sync_payload(health_checks)
+        return self._post_data(payload, dry_run, stats)
+
+    def publish_events(self, events: List[Event], dry_run=False, stats=SyncStats()) -> SyncStats:
+        stats.events = len(events)
+        payload = self._prepare_event_sync_payload(events)
         return self._post_data(payload, dry_run, stats)
 
     def publish(
@@ -72,6 +77,13 @@ class StackStateClient:
 
         payload = self._prepare_receiver_payload()
         payload.health = [sync]
+        return payload
+
+    def _prepare_event_sync_payload(self, events: List[Event]) -> ReceiverApi:
+        payload = self._prepare_receiver_payload()
+        for event in events:
+            event_list = payload.events.setdefault(event.event_type, [])
+            event_list.append(event)
         return payload
 
     def _prepare_topo_payload(self, components: List[Component], relations: List[Relation]) -> ReceiverApi:

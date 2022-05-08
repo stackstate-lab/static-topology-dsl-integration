@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sts_static_topology"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["Ravan Naidoo <rnaidoo@stackstate.com>"]
 packages = [
@@ -20,6 +20,7 @@ schematics = "^2.1.0"
 typing = "^3.7.4.1"
 asteval = "=0.9.17"
 attrs = "^21.4.0"
+pytz = "^2022.1"
 
 
 [tool.poetry.dev-dependencies]

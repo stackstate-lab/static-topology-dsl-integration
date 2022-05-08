@@ -7,32 +7,48 @@ defaults {
   environment Prod
   layer Test
   identifiers [ "test", "so cool" ]
-  labels [ rav, 'test:again']
+  labels [ withoutquotes, 'within:quotes']
   data {
-    myprop myvalu,
-    myarr [ test]
+    myprop myvalue,
+    myarr [ test ]
   }
-
 }
 
 components {
-  Host (
+  Host(
     name test
     environment xxx
     layer xxx
+    # List values can be code snippets also
     labels [```"s"```]
     processor ```
       print("Helloword")
-      rav = 10 + 10
+      y = 10 + 10
       def func(x):
         print("hi")
     ```
     relations [ test2, "test3|hosted by"]
   )
 
-  # Lets add compoent type with spaces in name
+  # Lets add component type with spaces in name
   Host In line(id test2, name test2, environment xxx, layer xxx)
 
-  # Lets add compoent type with dot in name
+  # Lets add component type with dot in name
   Host.dot.line(id test3, name test3, environment xxx, layer xxx)
+}
+
+events {
+    ElementPropertiesChanged (
+        title "Host Patched"
+        message ``` "%s host was patched" % factory.get_component_by_name("test").uid ```
+        identifiers [ test ]
+        tags ["statictopo:event"]
+        previous {
+            patch_version "v.1.1.0"
+        }
+        current  {
+            patch_version "v.1.1.2"
+        }
+        links ["[External link](http://someurl)"]
+    )
 }

@@ -43,6 +43,7 @@ class AgentProcessor:
             self.agent_check.relation(r.source_id, r.target_id, r.get_type(), r.properties)
         self.agent_check.stop_snapshot()
         self._publish_health()
+        self._publish_events()
 
     def _publish_health(self):
         self.log.info(f"Synchronizing  '{len(self.factory.health)}' health states")
@@ -68,3 +69,9 @@ class AgentProcessor:
             )
         self.log.info(f"Critical -> {critical}, Deviating -> {deviating}, Clear -> {clear}")
         self.agent_check.health.stop_snapshot()
+
+    def _publish_events(self):
+        self.log.info(f"Sending  '{len(self.factory.events)}' events")
+        for event in self.factory.events:
+            event_dict = event.to_primitive(role="public")
+            self.agent_check.event(event_dict)

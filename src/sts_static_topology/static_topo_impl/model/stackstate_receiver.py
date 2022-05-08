@@ -2,11 +2,12 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 from schematics import Model
-from schematics.transforms import wholelist, blacklist
+from schematics.transforms import blacklist, wholelist
 from schematics.types import (BooleanType, DictType, IntType, ListType,
-                              ModelType, StringType, TimestampType)
-from static_topo_impl.model.stackstate import (AnyType, Component,
-                                               HealthCheckState, Relation)
+                              ModelType, StringType)
+from static_topo_impl.model.stackstate import (AnyType, Component, Event,
+                                               HealthCheckState, Relation,
+                                               TimestampType)
 
 
 class Instance(Model):
@@ -59,7 +60,7 @@ class ReceiverApi(Model):
     apiKey: str = StringType(required=True)
     collection_timestamp: datetime = TimestampType(required=True)
     internal_hostname: str = StringType(required=True, serialized_name="internalHostname")
-    events: Dict[str, Any] = DictType(AnyType(), default={})
+    events: Dict[str, List[Event]] = DictType(ListType(ModelType(Event), default=[]), default={})
     metrics: List[Any] = ListType(AnyType(), default=[])
     service_checks: List[Any] = ListType(AnyType(), default=[])
     health: List[HealthSync] = ListType(ModelType(HealthSync), default=[])
@@ -73,4 +74,5 @@ class SyncStats(Model):
     components: int = IntType()
     relations: int = IntType()
     checks: int = IntType()
+    events: int = IntType()
     payloads: List[str] = ListType(StringType, default=[])

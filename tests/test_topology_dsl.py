@@ -1,5 +1,5 @@
 from static_topo_impl.dsl.interpreter import TopologyInterpreter
-from static_topo_impl.model import TopologyFactory
+from static_topo_impl.model.factory import TopologyFactory
 
 
 def test_topology_dsl():

@@ -29,4 +29,5 @@ class CliProcessor:
         stats = self.stackstate.publish(
             list(self.factory.components.values()), list(self.factory.relations.values()), dry_run
         )
-        return self.stackstate.publish_health_checks(list(self.factory.health.values()), dry_run=dry_run, stats=stats)
+        self.stackstate.publish_health_checks(list(self.factory.health.values()), dry_run=dry_run, stats=stats)
+        return self.stackstate.publish_events(self.factory.events, dry_run=dry_run, stats=stats)
