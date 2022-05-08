@@ -2,7 +2,7 @@
 
 ## Overview
 
-StackState Static Topology DSL allows you to easily define components, relations and health
+StackState Static Topology DSL allows you to easily define components, relations, events and health
 in `.topo` files using a ___Topology Language___.
 
 
