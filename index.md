@@ -76,7 +76,7 @@ These properties can also be defined in the `defaults` section for all component
 | message     | string | Optional.Defaults to ``                                                                          |
 | identifiers | list   | Required. At least 1 identifier should be defined                                                |
 | tags        | list   | Optional.                                                                                        |
-| links       | list   | Optional.  Links in the form '[description](url)'                                                |
+| links       | list   | Optional.  Links in the form \[description](url)                                                 |
 | processor   | code   | Optional. Process `event` object using code to set other properties or querying `factory` object |
 
 The properties can also be defined in the `defaults` section for all events.
