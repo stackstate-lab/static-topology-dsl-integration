@@ -101,6 +101,7 @@ Code snippets can be used for any component property to generate the value.
 The python code is interpreted with [asteval](https://newville.github.io/asteval/).
 The code will have access to a `factory` object. This can be used to query for other components or create components
 programmatically. The `component` object represents the current component being created.
+The `event` object represents the current event being created.
 
 See API Documentation
 
