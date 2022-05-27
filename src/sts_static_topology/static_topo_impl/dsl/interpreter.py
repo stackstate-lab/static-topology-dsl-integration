@@ -344,8 +344,17 @@ class TopologyInterpreter:
             rel_type = "uses"
             if len(rel_parts) == 2:
                 rel_type = rel_parts[1]
-            rel_id = f"{component.uid} --> {rel_parts[0]}"
-            relation = Relation({"source_id": component.uid, "target_id": rel_parts[0], "external_id": rel_id})
+            reverse = False
+            if rel_parts[0].startswith("<"):
+                reverse = True
+                rel_parts[0] = rel_parts[0][1:]
+
+            if reverse:
+                rel_id = f"{rel_parts[0]} --> {component.uid}"
+                relation = Relation({"source_id": rel_parts[0], "target_id": component.uid, "external_id": rel_id})
+            else:
+                rel_id = f"{component.uid} --> {rel_parts[0]}"
+                relation = Relation({"source_id": component.uid, "target_id": rel_parts[0], "external_id": rel_id})
             relation.set_type(rel_type)
             component.relations.append(relation)
 
