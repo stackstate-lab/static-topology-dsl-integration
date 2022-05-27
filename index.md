@@ -37,35 +37,35 @@ Components and Events are defined in their relevant sections.
 
 ### Default Properties
 
-| Name           | Type   | Description                                                                                          | 
-|----------------|--------|------------------------------------------------------------------------------------------------------|
-| id             | string | Optional.                                                                                            |
-| layer          | string | Optional.                                                                                            |
-| domain         | string | Optional.                                                                                            |
-| labels         | list   | Optional.                                                                                            |
-| identifiers    | list   | Optional.                                                                                            |
-| health         | string | Optional. Defaults to CLEAR. Valid values are CRITICAL, DEVIATING, CLEAR                             |
-| healthMessage  | string | Optional                                                                                             |
-| relations      | list   | Optional. `id` or `name` reference to related component. Use pipe symbol to define relation type     |
-| processor      | code   | Optional. Process `component` object using code to set other properties or querying `factory` object |
-| eventProcessor | code   | Optional. Process `event` object using code to set other properties or querying `factory` object     |
-| tags           | list   | Optional. Used for events.                                                                           |
+| Name           | Type   | Description                                                                                                                     | 
+|----------------|--------|---------------------------------------------------------------------------------------------------------------------------------|
+| id             | string | Optional.                                                                                                                       |
+| layer          | string | Optional.                                                                                                                       |
+| domain         | string | Optional.                                                                                                                       |
+| labels         | list   | Optional.                                                                                                                       |
+| identifiers    | list   | Optional.                                                                                                                       |
+| health         | string | Optional. Defaults to CLEAR. Valid values are CRITICAL, DEVIATING, CLEAR                                                        |
+| healthMessage  | string | Optional                                                                                                                        |
+| relations      | list   | Optional. `id` or `name` reference to related component. Use pipe symbol to define relation type.  Use '<' to reverse relation. |
+| processor      | code   | Optional. Process `component` object using code to set other properties or querying `factory` object                            |
+| eventProcessor | code   | Optional. Process `event` object using code to set other properties or querying `factory` object                                |
+| tags           | list   | Optional. Used for events.                                                                                                      |
 
 ### Component Properties
 
-| Name          | Type   | Description                                                                                          | 
-|---------------|--------|------------------------------------------------------------------------------------------------------|
-| id            | string | Optional. Defaults to `urn:<type>:<name>` when not defined                                           |
-| name          | string | Required                                                                                             |
-| layer         | string | Optional. Defaults to `unknown`                                                                      |
-| domain        | string | Optional.Defaults to `unknown`                                                                       |
-| labels        | list   | Optional.                                                                                            |
-| identifiers   | list   | Optional. Defaults to id when no identifiers defined                                                 |
-| health        | string | Optional. Defaults to CLEAR. Valid values are CRITICAL, DEVIATING, CLEAR                             |
-| healthMessage | string | Optional                                                                                             |
-| relations     | list   | Optional. `id` or `name` reference to related component. Use pipe symbol to define relation type     |
-| processor     | code   | Optional. Process `component` object using code to set other properties or querying `factory` object |
-| repeat        | int    | Optional. Repeat current component for the specified amount. Use code snippet to generate name.      |
+| Name          | Type   | Description                                                                                                                    | 
+|---------------|--------|--------------------------------------------------------------------------------------------------------------------------------|
+| id            | string | Optional. Defaults to `urn:<type>:<name>` when not defined                                                                     |
+| name          | string | Required                                                                                                                       |
+| layer         | string | Optional. Defaults to `unknown`                                                                                                |
+| domain        | string | Optional.Defaults to `unknown`                                                                                                 |
+| labels        | list   | Optional.                                                                                                                      |
+| identifiers   | list   | Optional. Defaults to id when no identifiers defined                                                                           |
+| health        | string | Optional. Defaults to CLEAR. Valid values are CRITICAL, DEVIATING, CLEAR                                                       |
+| healthMessage | string | Optional                                                                                                                       |
+| relations     | list   | Optional. `id` or `name` reference to related component. Use pipe symbol to define relation type. Use '<' to reverse relation. |
+| processor     | code   | Optional. Process `component` object using code to set other properties or querying `factory` object                           |
+| repeat        | int    | Optional. Repeat current component for the specified amount. Use code snippet to generate name.                                |
 
 These properties can also be defined in the `defaults` section for all components.
 
