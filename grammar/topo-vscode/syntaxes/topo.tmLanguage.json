@@ -29,7 +29,7 @@
 	  "language_keyword": {
 		"patterns": [
 		  {
-			"match": "\\b(defaults|events|ElementPropertiesChanged|title|message|tags|previous|current|components|identifiers|id|name|layer|domain|environment|processor|eventProcessor|labels|data|relations|health|healthMessage|links)\\b",
+			"match": "\\b(defaults|events|ElementPropertiesChanged|title|message|tags|previous|current|components|identifiers|id|name|layer|domain|environment|processor|eventProcessor|labels|data|relations|health|repeat|healthMessage|links)\\b",
 			"name": "keyword.control.topo"
 		  },
 		  {

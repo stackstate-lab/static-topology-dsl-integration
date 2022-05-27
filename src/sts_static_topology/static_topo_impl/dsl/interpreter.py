@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import attr
 from asteval import Interpreter
@@ -17,18 +17,19 @@ from textx.model import TextXSyntaxError
 @attr.s(kw_only=True)
 class TopologyContext:
     factory: TopologyFactory = attr.ib()
+    repeat_index: int = attr.ib(default=0)
     component: Component = attr.ib(default=None)
     event: Event = attr.ib(default=None)
 
 
 class PropertyInterpreter:
     def __init__(
-        self,
-        properties: Dict[str, Any],
-        defaults: Dict[str, Any],
-        source_name: str,
-        ctx: TopologyContext,
-        topology_meta: TextXMetaModel,
+            self,
+            properties: Dict[str, Any],
+            defaults: Dict[str, Any],
+            source_name: str,
+            ctx: TopologyContext,
+            topology_meta: TextXMetaModel,
     ):
         self.source_name = source_name
         self.defaults = defaults
@@ -41,11 +42,16 @@ class PropertyInterpreter:
         self.PropertyClass = self.topology_meta["Property"]
         self.default_source = "default"
 
+    def get_int_property(self, name: str, default=None) -> int:
+        value = self.get_property_value(name, self.properties, self.source_name, default=None)
+        if value is None:
+            value = self.get_property_value(name, self.defaults, self.default_source, default=default)
+        return self._assert_int(value, name, self.source_name)
+
     def get_string_property(self, name: str, default=None) -> str:
         value = self.get_property_value(name, self.properties, self.source_name, default=None)
         if value is None:
             value = self.get_property_value(name, self.defaults, self.default_source, default=default)
-
         return self._assert_string(value, name, self.source_name)
 
     def get_map_property(self, name: str, default=None) -> Dict[str, Any]:
@@ -125,6 +131,17 @@ class PropertyInterpreter:
         return value
 
     @staticmethod
+    def _assert_int(value: Any, name: str, source_name: str) -> int:
+        if value is not None:
+            try:
+                return int(value)
+            except Exception:
+                raise Exception(f"Expected int type for '{name}', but was {type(value)} on `{source_name}`")
+        else:
+            value = 0
+        return value
+
+    @staticmethod
     def _assert_dict(value: Any, name: str, source_name: str) -> Dict[str, Any]:
         if value is not None:
             if not isinstance(value, dict):
@@ -164,11 +181,12 @@ class PropertyInterpreter:
         aeval.symtable["factory"] = ctx.factory
         aeval.symtable["component"] = ctx.component
         aeval.symtable["event"] = ctx.event
+        aeval.symtable["repeat_index"] = ctx.repeat_index
         return aeval
 
     @staticmethod
     def _eval_expression(
-        expression: str, aeval: Interpreter, eval_property: str, source_name: str, fail_on_error: bool = True
+            expression: str, aeval: Interpreter, eval_property: str, source_name: str, fail_on_error: bool = True
     ):
         existing_errs = len(aeval.error)
         result = aeval.eval(expression)
@@ -263,35 +281,43 @@ class TopologyInterpreter:
         return resolved_identifiers
 
     def _interpret_component(self, component_ast, defaults):
-        component = Component()
-        component.set_type(component_ast.component_type)
         properties = self._index_properties(component_ast.properties)
-        ctx = TopologyContext(factory=self.factory, component=component)
-        property_interpreter = PropertyInterpreter(properties, defaults, component.get_type(), ctx, self.topology_meta)
+        ctx = TopologyContext(factory=self.factory)
+        property_interpreter = PropertyInterpreter(properties, defaults, component_ast.component_type, ctx,
+                                                   self.topology_meta)
 
-        component.set_name(property_interpreter.get_property("name"))
-        if component.get_name() is None:
-            raise Exception(f"Component name is required for '{component.get_type()}'.")
+        repeat = range(0, 1)
+        if "repeat" in properties:
+            repeat = range(0, property_interpreter.get_int_property("repeat"))
 
-        property_interpreter.source_name = component.get_name()
-        component.properties.update_properties(property_interpreter.merge_map_property("data"))
-        component.properties.layer = property_interpreter.get_string_property("layer", "Unknown")
-        component.properties.domain = property_interpreter.get_string_property("domain", "Unknown")
-        component.properties.environment = property_interpreter.get_string_property("environment", "Unknown")
-        component.properties.labels.extend(property_interpreter.merge_list_property("labels"))
-        component.uid = property_interpreter.get_string_property("id", None)
-        component.properties.identifiers.extend(property_interpreter.merge_list_property("identifiers"))
-        property_interpreter.run_processors()
+        for index in repeat:
+            component = Component()
+            component.set_type(component_ast.component_type)
+            ctx.component = component
+            ctx.repeat_index = index
+            component.set_name(property_interpreter.get_property("name"))
+            if component.get_name() is None:
+                raise Exception(f"Component name is required for '{component.get_type()}'.")
 
-        if component.uid is None:
-            component.uid = f"urn:{component.get_type().lower()}:{component.get_name().lower()}"
+            property_interpreter.source_name = component.get_name()
+            component.properties.update_properties(property_interpreter.merge_map_property("data"))
+            component.properties.layer = property_interpreter.get_string_property("layer", "Unknown")
+            component.properties.domain = property_interpreter.get_string_property("domain", "Unknown")
+            component.properties.environment = property_interpreter.get_string_property("environment", "Unknown")
+            component.properties.labels.extend(property_interpreter.merge_list_property("labels"))
+            component.uid = property_interpreter.get_string_property("id", None)
+            component.properties.identifiers.extend(property_interpreter.merge_list_property("identifiers"))
+            property_interpreter.run_processors()
 
-        if len(component.properties.identifiers) == 0:
-            component.properties.identifiers.append(component.uid)
+            if component.uid is None:
+                component.uid = f"urn:{component.get_type().lower()}:{component.get_name().lower()}"
 
-        self._interpret_health(component, property_interpreter)
-        self._interpret_relations(component, property_interpreter)
-        self.factory.add_component(component)
+            if len(component.properties.identifiers) == 0:
+                component.properties.identifiers.append(component.uid)
+
+            self._interpret_health(component, property_interpreter)
+            self._interpret_relations(component, property_interpreter)
+            self.factory.add_component(component)
 
     def _resolve_relations(self):
         components: List[Component] = self.factory.components.values()
@@ -417,7 +443,7 @@ Property:
 
 PropertyKeyword:
      'identifiers' | 'id' | 'name' | 'layer' | 'domain' | 'environment' | 'labels' | 'processor' | 'data' |
-     'relations' | 'healthMessage' |'health'
+     'relations' | 'healthMessage' |'health' | 'repeat'
 ;
 
 DefaultProperty:
