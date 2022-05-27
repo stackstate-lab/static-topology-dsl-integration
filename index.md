@@ -65,6 +65,7 @@ Components and Events are defined in their relevant sections.
 | healthMessage | string | Optional                                                                                             |
 | relations     | list   | Optional. `id` or `name` reference to related component. Use pipe symbol to define relation type     |
 | processor     | code   | Optional. Process `component` object using code to set other properties or querying `factory` object |
+| repeat        | int    | Optional. Repeat current component for the specified amount. Use code snippet to generate name.      |
 
 These properties can also be defined in the `defaults` section for all components.
 
@@ -183,6 +184,7 @@ components {
     )
     host(name test2, health CRITICAL)
     host(name test3)
+    host(name ``` "test_%s" % repeat_index ```, repeat 5)
 }
 
 events {

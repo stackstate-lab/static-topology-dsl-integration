@@ -60,7 +60,7 @@ Property:
 
 PropertyKeyword:
      'identifiers' | 'id' | 'name' | 'layer' | 'domain' | 'environment' | 'labels' | 'processor' | 'data' |
-     'relations' | 'healthMessage' |'health'
+     'relations' | 'healthMessage' |'health' | 'repeat'
 ;
 
 DefaultProperty:

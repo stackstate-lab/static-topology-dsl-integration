@@ -24,6 +24,10 @@ components {
     ```
     relations [ test2, "test3|hosted by"]
   )
+  # Dynamically generate 2 hosts
+  Host(
+    repeat 2
+    name ``` "test%s" % repeat_index ```
 }
 
 events {
