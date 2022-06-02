@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import attr
 from asteval import Interpreter
@@ -24,12 +24,12 @@ class TopologyContext:
 
 class PropertyInterpreter:
     def __init__(
-            self,
-            properties: Dict[str, Any],
-            defaults: Dict[str, Any],
-            source_name: str,
-            ctx: TopologyContext,
-            topology_meta: TextXMetaModel,
+        self,
+        properties: Dict[str, Any],
+        defaults: Dict[str, Any],
+        source_name: str,
+        ctx: TopologyContext,
+        topology_meta: TextXMetaModel,
     ):
         self.source_name = source_name
         self.defaults = defaults
@@ -186,7 +186,7 @@ class PropertyInterpreter:
 
     @staticmethod
     def _eval_expression(
-            expression: str, aeval: Interpreter, eval_property: str, source_name: str, fail_on_error: bool = True
+        expression: str, aeval: Interpreter, eval_property: str, source_name: str, fail_on_error: bool = True
     ):
         existing_errs = len(aeval.error)
         result = aeval.eval(expression)
@@ -283,8 +283,9 @@ class TopologyInterpreter:
     def _interpret_component(self, component_ast, defaults):
         properties = self._index_properties(component_ast.properties)
         ctx = TopologyContext(factory=self.factory)
-        property_interpreter = PropertyInterpreter(properties, defaults, component_ast.component_type, ctx,
-                                                   self.topology_meta)
+        property_interpreter = PropertyInterpreter(
+            properties, defaults, component_ast.component_type, ctx, self.topology_meta
+        )
 
         repeat = range(0, 1)
         if "repeat" in properties:

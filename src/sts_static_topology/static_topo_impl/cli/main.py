@@ -27,7 +27,7 @@ def run(conf: str, log_level: str, dry_run: bool, repeat: bool, work_dir: str, r
             _internal_run(conf, dry_run)
             click.echo(f"Will repeat after {repeat_interval} seconds.")
             time.sleep(repeat_interval)
-            click.echo(f"Repeating...")
+            click.echo("Repeating...")
     else:
         _internal_run(conf, dry_run)
 
