@@ -234,7 +234,7 @@ $ pip install six requests
 
 
 ```bash
-python -m pip install https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/0.2.0/sts_static_topology-0.2.0-py2.py3-none-any.whl
+python -m pip install https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/0.2.1/sts_static_topology-0.2.1-py2.py3-none-any.whl
 ```
 
 The `ststopo` command-line utility reads `.topo` files specified in the `conf.yaml` and sends the resulting Components, Relations and Health to StackState.
@@ -425,12 +425,12 @@ To send to StackState run `ststopo`
 
 ### Agent Check
 
-Download Static Topology DSL agent check [release](https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/v0.2.0/sts_static_topology-0.2.0.zip)
+Download Static Topology DSL agent check [release](https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/v0.2.1/sts_static_topology-0.2.1.zip)
 to the machine running the StackState Agent.
 
 ```bash
-$ curl -o sts_static_topology-0.2.0.zip -L https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/0.2.0/sts_static_topology-0.2.0.zip
-$ unzip ./sts_static_topology-0.2.0.zip
+$ curl -o sts_static_topology-0.2.1.zip -L https://github.com/stackstate-lab/static-topology-dsl-integration/releases/download/0.2.1/sts_static_topology-0.2.1.zip
+$ unzip ./sts_static_topology-0.2.1.zip
 $ ./install.sh
 $ cd /etc/stackstate-agent/conf.d/static_topology_dsl.d
 $ cp ./conf.yaml.example ./conf.yaml
